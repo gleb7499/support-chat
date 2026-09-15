@@ -1,9 +1,9 @@
-/* ====== ПЕРЕМЕННЫЕ ======
-   Дизайн‑токены проекта. Используем только var(...) — никаких хардкодов цветов.
-   Это позволяет легко поддерживать темы и быстро менять визуальный язык.
+/* ====== VARIABLES ======
+   Project design tokens. Only var(...) is used — no hardcoded colors.
+   This makes themes easy to maintain and the visual language quick to change.
 */
 :root {
-  /* ====== БАЗА ====== */
+  /* ====== BASE ====== */
   --bg: #121116;
   --panel: #17161b;
   --panel-2: #121116;
@@ -19,19 +19,19 @@
   --transition-base: .15s ease;
   --focus-outline: 2px solid var(--accent);
 
-  /* ====== ТЕКСТ ====== */
+  /* ====== TEXT ====== */
   --text: #e6e9ee;
   --muted: #9aa5b1;
   --white: #ffffff;
-  /* Дополнительный вторичный текст (подписи под основным) */
+  /* Additional secondary text (captions under the primary) */
   --text-muted-alt: #97a3b4;
 
   /* ====== Inline image (attachments) ====== */
-  --inline-image-max-width: 420px;   /* было 220px */
-  --inline-image-max-height: 300px;  /* было 180px */
-  --inline-image-side-gap: 1px;      /* уменьшили горизонтальные отступы (ранее визуально ~14px через padding контейнера) */
+  --inline-image-max-width: 420px;   /* was 220px */
+  --inline-image-max-height: 300px;  /* was 180px */
+  --inline-image-side-gap: 1px;      /* reduced horizontal padding (previously ~14px visually via container padding) */
 
-  /* ====== БЕЙДЖИ / СТАТУСЫ ====== */
+  /* ====== BADGES / STATUSES ====== */
   --badge__bot-bg: #33cc331a;
   --badge__bot: #33cc33;
   --badge__bot-border: #33cc3333;
@@ -40,11 +40,11 @@
   --badge__person: #8758f3;
   --badge__person-border: #8758f333;
 
-  /* ====== АКЦЕНТЫ ====== */
-  --purple: #8758f3;     /* фиолетовый для выделений/кнопок */
-  --danger: #dc2626;     /* ошибки, красный */
-  --danger-hover: #ef44441a; /* hover/active для опасных действий */
-  --accent: #8758f3;     /* основной акцент (дублирует purple для унификации имени) */
+  /* ====== ACCENTS ====== */
+  --purple: #8758f3;     /* purple for highlights/buttons */
+  --danger: #dc2626;     /* errors, red */
+  --danger-hover: #ef44441a; /* hover/active for dangerous actions */
+  --accent: #8758f3;     /* main accent (duplicates purple to unify the name) */
 
   /* ====== ICON BUTTON STATES ====== */
   --icon-btn-hover-bg: var(--accent);
@@ -56,40 +56,40 @@
   --menu-accent-bg: var(--accent);
   --menu-accent-color: var(--white);
 
-  /* ====== ТАЙМЕР ====== */
-  --timer-bg: rgba(255, 93, 93, 0.1);         /* фон пилюли */
-  --timer-text: #ff5d5d;                      /* текст и иконка */
+  /* ====== TIMER ====== */
+  --timer-bg: rgba(255, 93, 93, 0.1);         /* pill background */
+  --timer-text: #ff5d5d;                      /* text and icon */
   --timer-border: rgba(255,155,80,0.12);
-  /* Баннер ИИ (кнопка в футере чата) */
+  /* AI banner (button in chat footer) */
   --ai-banner-bg: #33cc331a;
   --ai-banner-border: #33cc3333;
   --ai-banner-hover-bg: #33cc3333;
   --ai-banner-title: #33cc33;
   --ai-banner-subtitle: var(--text-muted-alt);
 
-  /* ====== ДОПОЛНИТЕЛЬНЫЕ ПОВЕРХНОСТИ/СОСТОЯНИЯ ====== */
-  --surface-elevated: #18171d;   /* всплывающие меню, дропдауны */
-  --hover: #23222a;              /* hover для пунктов меню */
-  --hover-subtle: #161c24;       /* лёгкий hover/ghost-кнопки */
-  --selected: #151b23;           /* выбранный элемент списка */
-  --avatar-bg: #1a2029;          /* фон аватара-плейсхолдера */
+  /* ====== ADDITIONAL SURFACES/STATES ====== */
+  --surface-elevated: #18171d;   /* popup menus, dropdowns */
+  --hover: #23222a;              /* hover for menu items */
+  --hover-subtle: #161c24;       /* subtle hover/ghost buttons */
+  --selected: #151b23;           /* selected list item */
+  --avatar-bg: #1a2029;          /* avatar placeholder background */
 
-  /* ====== СКРОЛЛБАР ====== */
+  /* ====== SCROLLBAR ====== */
   --scrollbar-thumb: #23232b;
   --scrollbar-thumb-hover: #31313a;
 
-  /* ====== ЛЕЙАУТ ====== */
+  /* ====== LAYOUT ====== */
   --sidebar-w: 340px;
   --gutter: 16px;
   --container-max: 1280px;
 
   /* ====== DIALOG STATES ====== */
-  --dialog-border: #2b2b31;              /* стандартная граница элемента */
-  --dialog-hover-bg: #303036;            /* фон при hover (когда не выбран) */
-  --dialog-selected-bg: #8758f31a;       /* фон выбранного */
-  --dialog-selected-border: #8758f34d;   /* граница выбранного */
+  --dialog-border: #2b2b31;              /* standard item border */
+  --dialog-hover-bg: #303036;            /* hover background (when not selected) */
+  --dialog-selected-bg: #8758f31a;       /* selected background */
+  --dialog-selected-border: #8758f34d;   /* selected border */
   
-  /* ====== COMPOSER (ввод оператора) ====== */
+  /* ====== COMPOSER (operator input) ====== */
   --input-bg: #2B2B31;
   --input-border: #2f3036;
   --input-placeholder: #6c7480;
@@ -97,52 +97,52 @@
   --send-btn-bg: var(--accent);
   --send-btn-color: var(--white);
   /* ====== MSG FILE ATTACHMENTS (tokens) ====== */
-  --msg-file-bg: #1c1c21;         /* базовый фон файла (бот/клиент) */
-  --msg-file-icon-bg: #1c1c21;    /* фон квадрата иконки */
-  --msg-file-border: #2b2b31;     /* стандартная граница файла */
+  --msg-file-bg: #1c1c21;         /* base file background (bot/client) */
+  --msg-file-icon-bg: #1c1c21;    /* icon square background */
+  --msg-file-border: #2b2b31;     /* standard file border */
   --disabled-bg: #23232b;
   --disabled-color: #6c7480;
 
-  /* ====== ДОПОЛНИТЕЛЬНЫЕ ИЗВЛЕЧЁННЫЕ ЦВЕТА (рефактор хардкодов) ====== */
-  /* Поверхности */
-  --surface-deep: #121216;            /* глубокий фон (modal content, tabs active) */
-  --surface-tab: #2b2b31;             /* фон контейнера вкладок / альтернативные панели */
-  --surface-agent: #1c1c21;           /* фон контейнера сообщений агента */
-  --surface-client: #242429;          /* фон сообщений клиента */
-  --surface-client-legacy: #3a3a42;   /* старый фон (оставлен для обратной совместимости) */
-  --surface-thumb: #1f1f24;           /* превью / thumbnail фоны */
-  --surface-icon: #242429;            /* иконные квадратные подложки */
+  /* ====== ADDITIONAL EXTRACTED COLORS (hardcode refactor) ====== */
+  /* Surfaces */
+  --surface-deep: #121216;            /* deep background (modal content, tabs active) */
+  --surface-tab: #2b2b31;             /* tab container background / alternative panels */
+  --surface-agent: #1c1c21;           /* agent message container background */
+  --surface-client: #242429;          /* client message background */
+  --surface-client-legacy: #3a3a42;   /* old background (kept for backward compatibility) */
+  --surface-thumb: #1f1f24;           /* preview / thumbnail backgrounds */
+  --surface-icon: #242429;            /* icon square backdrops */
 
-  /* Границы / разделители сообщений */
-  --border-client: #35353b;           /* граница сообщений клиента (новая) */
-  --border-client-legacy: #44444c;    /* старая граница клиента */
-  --border-agent: #26262b;            /* граница агентского контейнера */
-  --border-bubble: #2f3036;           /* граница базового пузыря */
+  /* Borders / message dividers */
+  --border-client: #35353b;           /* client message border (new) */
+  --border-client-legacy: #44444c;    /* old client border */
+  --border-agent: #26262b;            /* agent container border */
+  --border-bubble: #2f3036;           /* base bubble border */
 
-  /* Сообщения */
-  --msg-bubble-bg: #2b2b31;           /* базовый пузырь */
-  --msg-bubble-border: #2f3036;       /* граница базового пузыря */
-  --msg-client-bg: #242429;           /* актуальный фон клиента */
-  --msg-client-border: #35353b;       /* актуальная граница клиента */
-  --msg-client-bg-legacy: #3a3a42;    /* устаревший фон клиента */
-  --msg-client-border-legacy: #44444c;/* устаревшая граница клиента */
-  --msg-agent-bg: #1c1c21;            /* фон контейнера агента */
-  --msg-agent-border: #26262b;        /* граница контейнера агента */
-  --msg-bot-bg: #223822;              /* фон бота */
-  --operator-meta: rgba(255,255,255,.75); /* подписи внутри операторского (accent) блока */
+  /* Messages */
+  --msg-bubble-bg: #2b2b31;           /* base bubble */
+  --msg-bubble-border: #2f3036;       /* base bubble border */
+  --msg-client-bg: #242429;           /* current client background */
+  --msg-client-border: #35353b;       /* current client border */
+  --msg-client-bg-legacy: #3a3a42;    /* deprecated client background */
+  --msg-client-border-legacy: #44444c;/* deprecated client border */
+  --msg-agent-bg: #1c1c21;            /* agent container background */
+  --msg-agent-border: #26262b;        /* agent container border */
+  --msg-bot-bg: #223822;              /* bot background */
+  --operator-meta: rgba(255,255,255,.75); /* captions inside the operator (accent) block */
 
-  /* Прелоад / прогресс */
-  --progress-bg: #26262d;             /* фон прогресс-бара загрузки */
-  --spinner-track: #35353b;           /* цвет кольца спиннера */
+  /* Preload / progress */
+  --progress-bg: #26262d;             /* upload progress bar background */
+  --spinner-track: #35353b;           /* spinner ring color */
 
-  /* Опасные / предупреждения расширенные */
-  --danger-bright: #ef4444;           /* более яркий красный для иконок/действий */
+  /* Danger / extended warnings */
+  --danger-bright: #ef4444;           /* brighter red for icons/actions */
 
-  /* Оверлеи / альфы */
-  --hover-translucent: #24242980;     /* полупрозрачный hover подсветки */
-  --operator-file-bg: #24242933;      /* фон файлов во всплывающем (оператор) */
+  /* Overlays / alphas */
+  --hover-translucent: #24242980;     /* translucent hover highlight */
+  --operator-file-bg: #24242933;      /* file background in popup (operator) */
 
-  /* Полупрозрачные белые */
+  /* Translucent whites */
   --white-a4: rgba(255,255,255,0.04);
   --white-a6: rgba(255,255,255,0.06);
   --white-a10: rgba(255,255,255,0.10);
@@ -150,13 +150,13 @@
   --white-a18: rgba(255,255,255,0.18);
   --white-a75: rgba(255,255,255,0.75);
 
-  /* Полупрозрачные чёрные */
+  /* Translucent blacks */
   --black-a15: rgba(0,0,0,.15);
   --black-a40: rgba(0,0,0,.40);
   --black-a54: rgba(0,0,0,.54);
   --black-a55: rgba(0,0,0,.55);
 
-  /* Модальные окна / предпросмотр изображений */
+  /* Modal windows / image preview */
   --image-download-bg: var(--black-a55);
   --image-hover-overlay: var(--black-a15);
   --modal-overlay-bg: var(--black-a54);
@@ -166,16 +166,16 @@
   --modal-close-bg-hover: var(--white-a12);
   --modal-close-border-hover: var(--white-a18);
 
-  /* Фокус */
-  --focus-color: #4d90fe;             /* запасной цвет для outline специфических элементов */
-  /* Дополнительные тени (ранее инлайн) */
+  /* Focus */
+  --focus-color: #4d90fe;             /* fallback color for outlines of specific elements */
+  /* Additional shadows (previously inline) */
   --shadow-popover: 0 8px 32px rgba(0,0,0,0.45);
   --shadow-card-strong: 0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04);
 }
 
 
-/* ====== БАЗА/RESET ======
-   Базовая типографика и сброс box-sizing. Верстка построена на flex/grid.
+/* ====== BASE/RESET ======
+   Basic typography and box-sizing reset. Layout is built on flex/grid.
 */
 *,
 *::before,
@@ -191,7 +191,7 @@ html, body {
   margin: 0;
 }
 
-  /* Визуально скрытый, но доступный текст / элементы (например, skip-link в начале страницы) */
+  /* Visually hidden but accessible text / elements (e.g. skip-link at the top of the page) */
   .visually-hidden {
     position: absolute !important;
     width: 1px; height: 1px;
@@ -200,7 +200,7 @@ html, body {
     white-space: nowrap; border: 0;
   }
 
-  /* Skip link появляется при фокусе */
+  /* Skip link appears on focus */
   a.visually-hidden:focus, a.visually-hidden:focus-visible {
     position: static !important;
     width: auto; height: auto;
@@ -217,20 +217,20 @@ html, body {
 
 img { display: inline-block; height: 1em; width: 1em; object-fit: contain; }
 button { font: inherit; color: inherit; }
-/* ====== УТИЛИТЫ ====== */
+/* ====== UTILITIES ====== */
 .focus-ring:focus-visible { outline: var(--focus-outline); outline-offset:2px; }
 .sr-only { position:absolute !important; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; border:0; }
 .no-scrollbar { scrollbar-width:none; }
 .no-scrollbar::-webkit-scrollbar { display:none; }
 ::placeholder { color: var(--input-placeholder); }
 
-/* ====== Утилиты цвета ====== */
+/* ====== Color utilities ====== */
 .text-danger { color: var(--danger); }
 .text-muted { color: var(--muted); }
 
 
-/* ====== КОНТЕЙНЕР-ОБОЛОЧКА ======
-   Вся страница вмещается в .shell с ограничением по ширине.
+/* ====== WRAPPER CONTAINER ======
+   The whole page fits in .shell with a max width.
 */
 .shell{
   margin: 0 auto;
@@ -243,7 +243,7 @@ button { font: inherit; color: inherit; }
 }
 
 
-/* ====== ХЕДЕР ====== */
+/* ====== HEADER ====== */
 .app-header{
   display: flex;
   align-items: center;
@@ -279,8 +279,8 @@ button { font: inherit; color: inherit; }
 }
 .app-header__title{ font-weight: 700; font-size: 15px; }
 
-/* маленький счётчик рядом с заголовком
-   Отображает общее количество активных диалогов
+/* small counter next to the heading
+   Shows the total number of active dialogs
 */
 .sidebar__counter{
   display: inline-flex;
@@ -300,7 +300,7 @@ button { font: inherit; color: inherit; }
 .app-header__right{ display: flex; align-items: center; gap: 8px; }
 
 
-/* ====== ОСНОВНОЙ ЛЕЙАУТ ====== */
+/* ====== MAIN LAYOUT ====== */
 .app{
   display: grid;
   grid-template-columns: var(--sidebar-w) 1fr;
@@ -311,8 +311,8 @@ button { font: inherit; color: inherit; }
 }
 
 
-/* ====== САЙДБАР ======
-   Левая колонка: проект + список диалогов + пагинация.
+/* ====== SIDEBAR ======
+   Left column: project + dialog list + pagination.
 */
 .sidebar{
   background: var(--panel);
@@ -324,7 +324,7 @@ button { font: inherit; color: inherit; }
   overflow: hidden;
 }
 
-/* Строка проекта в сайдбаре */
+/* Project row in the sidebar */
 .sidebar__project{
   position: relative;
   display: flex;
@@ -339,9 +339,9 @@ button { font: inherit; color: inherit; }
 }
 
 
-/* ====== КАСТОМНЫЙ SELECT (DROPDOWN) ======
-   Нативный <select> прозрачный поверх. Видимая часть — кастомный UI.
-   Состояние открытия управляется классом .open снаружи из JS.
+/* ====== CUSTOM SELECT (DROPDOWN) ======
+   Native <select> is transparent on top. The visible part is custom UI.
+   Open state is controlled by the .open class from JS.
 */
 .select {
   position: relative;
@@ -378,8 +378,8 @@ button { font: inherit; color: inherit; }
   pointer-events: none;
 }
 
-/* Кастомный dropdown
-   Список опций. Поддерживает роли/ARIA из JS.
+/* Custom dropdown
+   Options list. Supports roles/ARIA from JS.
 */
 .select__dropdown {
   display: none;
@@ -440,9 +440,9 @@ button { font: inherit; color: inherit; }
 }
 
 
-/* ====== Кнопки-иконки и кнопки ======
-   .icon-btn — квадратная иконка-кнопка (меню и т.п.)
-   .btn — универсальная кнопка, ghost-стиль по умолчанию.
+/* ====== Icon buttons and buttons ======
+   .icon-btn — square icon button (menu etc.)
+   .btn — universal button, ghost style by default.
 */
 .icon-btn{
   display: inline-grid;
@@ -457,14 +457,14 @@ button { font: inherit; color: inherit; }
   transition: background-color .15s ease, border-color .15s ease, color .15s ease;
 }
 
-/* Hover: подсвечиваем акцентом только невыбранные и доступные кнопки */
+/* Hover: highlight only unselected and enabled buttons with the accent */
 .icon-btn:hover{
   background: var(--icon-btn-hover-bg);
   border-color: var(--icon-btn-hover-bg);
   color: var(--icon-btn-hover-color);
 }
 
-/* Focus-visible: акцент + сохраняем outline из общего правила (var(--accent)) */
+/* Focus-visible: accent + keep the outline from the general rule (var(--accent)) */
 .icon-btn:focus-visible{
   background: var(--icon-btn-focus-bg);
   border-color: var(--icon-btn-focus-bg);
@@ -490,8 +490,8 @@ button { font: inherit; color: inherit; }
   display: block;
   margin: 0 auto;
 }
-/* Поддержка inline-SVG иконок в ghost-кнопках
-   Иконки окрашиваются через currentColor от контейнера (.text-muted/.text-danger).
+/* Inline-SVG icon support in ghost buttons
+   Icons are colored via currentColor from the container (.text-muted/.text-danger).
 */
 .btn--ghost .icon{
   width: 24px;
@@ -507,7 +507,7 @@ button { font: inherit; color: inherit; }
   color: var(--muted) !important;
 }
 
-/* ПАГИНАЦИЯ: акцентные состояния только для #btnPrev и #btnNext */
+/* PAGINATION: accent states only for #btnPrev and #btnNext */
 #btnPrev,
 #btnNext {
   position: relative;
@@ -526,25 +526,25 @@ button { font: inherit; color: inherit; }
   color: var(--white);
 }
 
-/* ====== КНОПКА ЛОГАУТА ======
-   Близка по стилю к .chat__icon-btn, но:
-   - фиксированные размеры 36x36
-   - полное центрирование SVG (grid + padding:0)
-   - базовый цвет иконки = var(--danger) (через .text-danger или дублируем для надёжности)
-   - при hover: фон var(--danger), цвет иконки var(--danger-bright) (анимация 150ms)
+/* ====== LOGOUT BUTTON ======
+   Style is close to .chat__icon-btn, but:
+   - fixed size 36x36
+   - full SVG centering (grid + padding:0)
+   - base icon color = var(--danger) (via .text-danger or duplicated for reliability)
+   - on hover: background var(--danger), icon color var(--danger-bright) (150ms animation)
 */
 #btnLogout {
   width:36px;
   height:36px;
-  padding:0; /* переопределяем padding базового .btn */
+  padding:0; /* override the base .btn padding */
   display:inline-grid;
   place-items:center;
   background:transparent;
   border:1px solid transparent;
   border-radius:10px;
-  line-height:0; /* убирает возможное вертикальное смещение */
+  line-height:0; /* removes possible vertical shift */
   cursor:pointer;
-  color:var(--danger); /* гарантируем начальный цвет */
+  color:var(--danger); /* guarantee the initial color */
   transition: background-color .15s ease, color .15s ease, border-color .15s ease;
 }
 #btnLogout .icon { width:16px; height:16px; display:block; }
@@ -554,7 +554,7 @@ button { font: inherit; color: inherit; }
 
 
 /* ====== POPUP MENU ======
-   Универсальный выпадающий список. Открытие через [aria-hidden="false"].
+   Universal dropdown. Opens via [aria-hidden="false"].
 */
 .popup-menu{
   display: none;
@@ -597,7 +597,7 @@ button { font: inherit; color: inherit; }
   font-weight: 500;
 }
 
-/* Акцентные состояния ТОЛЬКО для пунктов внутри #projectMenu */
+/* Accent states ONLY for items inside #projectMenu */
 #projectMenu .popup-menu__item{
   transition: background-color .15s ease, color .15s ease;
 }
@@ -608,7 +608,7 @@ button { font: inherit; color: inherit; }
   color: var(--menu-accent-color);
 }
 
-/* Акцентная подсветка пунктов контекстного меню диалога */
+/* Accent highlight for dialog context menu items */
 #dialogMenu .popup-menu__item{
   transition: background-color .15s ease, color .15s ease;
 }
@@ -620,8 +620,8 @@ button { font: inherit; color: inherit; }
 }
 
 
-/* ====== СПИСОК ДИАЛОГОВ ======
-   Список с опцией выбора. Атрибут aria-selected управляется из JS.
+/* ====== DIALOG LIST ======
+   Selectable list. The aria-selected attribute is controlled from JS.
 */
 .dialog-list{
   margin: 0;
@@ -643,22 +643,22 @@ button { font: inherit; color: inherit; }
   transition: background .15s ease, border-color .15s ease;
 }
 .dialog + .dialog{ margin-top: 6px; }
-/* Hover (только если не выбран) */
+/* Hover (only if not selected) */
 .dialog:not([aria-selected="true"]):hover{
   background: var(--dialog-hover-bg);
 }
-/* Выбранный */
+/* Selected */
 .dialog[aria-selected="true"]{
   background: var(--dialog-selected-bg);
   border-color: var(--dialog-selected-border);
 }
-/* Сохраняем цвет выбранного при hover */
+/* Keep the selected color on hover */
 .dialog[aria-selected="true"]:hover{
   background: var(--dialog-selected-bg);
   border-color: var(--dialog-selected-border);
 }
 
-/* Аватар-плейсхолдер */
+/* Avatar placeholder */
 .avatar{
   width: 40px;
   height: 40px;
@@ -671,7 +671,7 @@ button { font: inherit; color: inherit; }
   font-weight: 600;
 }
 
-/* Иконка бота для "Нейросеть" */
+/* Bot icon for "Neural network" */
 .dialog__bot-icon {
   width: 12px;
   height: 12px;
@@ -680,7 +680,7 @@ button { font: inherit; color: inherit; }
   color: var(--badge__bot);
 }
 
-/* Иконка человека для "Оператор" */
+/* Person icon for "Operator" */
 .dialog__user-icon {
   width: 12px;
   height: 12px;
@@ -689,7 +689,7 @@ button { font: inherit; color: inherit; }
   color: var(--accent);
 }
 
-/* Контент диалога */
+/* Dialog content */
 .dialog__top{
   display: flex;
   align-items: center;
@@ -703,8 +703,8 @@ button { font: inherit; color: inherit; }
   margin-bottom: 5px;
 }
 
-/* Таймер-пил
-   Маленькая «пилюля» с временем. Спрятана по умолчанию.
+/* Timer pill
+   Small "pill" with a time. Hidden by default.
 */
 .dialog__timer{
   display: inline-flex;
@@ -780,8 +780,8 @@ button { font: inherit; color: inherit; }
 }
 
 
-/* ====== ПОДВАЛ САЙДБАРА ======
-   Пагинация списка диалогов.
+/* ====== SIDEBAR FOOTER ======
+   Dialog list pagination.
 */
 .sidebar__footer{
   display: flex;
@@ -798,8 +798,8 @@ button { font: inherit; color: inherit; }
 }
 
 
-/* ====== ПРАВАЯ ОБЛАСТЬ ======
-   Рабочая область справа. Пока показывает заглушку.
+/* ====== RIGHT AREA ======
+   Work area on the right. Shows a placeholder for now.
 */
 .workspace{
   background: var(--bg);
@@ -830,8 +830,8 @@ button { font: inherit; color: inherit; }
 }
 
 
-/* ====== Фокус ======
-   Видимые контуры для клавиатурной навигации. Улучшает доступность.
+/* ====== Focus ======
+   Visible outlines for keyboard navigation. Improves accessibility.
 */
 .dialog:focus-visible,
 .icon-btn:focus-visible,
@@ -843,14 +843,14 @@ button { font: inherit; color: inherit; }
 }
 
 
-/* >1280px — тянемся по ширине, сетка и размеры сохраняются */
+/* >1280px — stretch in width, grid and sizes are preserved */
 @media (min-width: 1281px){
   .shell{ max-width: 100%; }
 }
 
 
-/* ====== СКРОЛЛБАР ======
-   Стилизация скроллбаров под тёмную тему.
+/* ====== SCROLLBAR ======
+   Scrollbar styling for the dark theme.
 */
 ::-webkit-scrollbar {
   width: 10px;
@@ -875,9 +875,9 @@ button { font: inherit; color: inherit; }
   scrollbar-color: var(--scrollbar-thumb) var(--panel);
 }
 
-/* ====== ЧАТ (правая панель при выборе диалога) ======
-   Структура: header (фикс высота по контенту) + body (прокрутка) + footer.
-   По умолчанию скрыт атрибутом hidden.  */
+/* ====== CHAT (right panel when a dialog is selected) ======
+   Structure: header (fixed height by content) + body (scroll) + footer.
+   Hidden by default via the hidden attribute.  */
 .chat[hidden]{ display:none; }
 .chat{
   position: relative;
@@ -916,7 +916,7 @@ button { font: inherit; color: inherit; }
 .chat__footer{
   border-top: 1px solid var(--border);
   padding: 16px;
-  min-height: 100px; /* резерв под будущий инпут / кнопки */
+  min-height: 100px; /* reserve space for a future input / buttons */
   display:flex;
   align-items:center;
   justify-content:center;
@@ -925,7 +925,7 @@ button { font: inherit; color: inherit; }
   background-color: var(--panel);
 }
 
-/* ====== Баннер ИИ (кнопка) ====== */
+/* ====== AI banner (button) ====== */
 .chat__ai-banner {
   width: 100%;
   background: var(--ai-banner-bg);
@@ -963,7 +963,7 @@ button { font: inherit; color: inherit; }
   outline-offset: 2px;
 }
 
-/* ====== Плейсхолдер оператора (пока заглушка) ====== */
+/* ====== Operator placeholder (stub for now) ====== */
 .chat__operator-placeholder {
   width: 100%;
   background: var(--panel-2);
@@ -986,9 +986,9 @@ button { font: inherit; color: inherit; }
 }
 .chat__operator-placeholder-desc { margin: 0; line-height: 1.4; }
 
-/* ====== COMPOSER (ввод текста оператором) ====== */
+/* ====== COMPOSER (operator text input) ====== */
 .chat__composer-wrapper { width:100%; display:flex; flex-direction:column; gap:8px; }
-/* Верхняя зона: поле + иконки + кнопка отправки */
+/* Top zone: input + icons + send button */
 .chat__composer { background: var(--input-bg); border:1px solid var(--input-border); border-radius:12px; padding:12px 14px; display:flex; flex-direction:row; gap:14px; align-items:flex-end; position:relative; }
 .chat__composer:focus-within { border-color: var(--input-focus-border); }
 .chat__composer-main { flex:1 1 auto; display:flex; flex-direction:row; align-items:flex-start; gap:10px; }
@@ -1021,7 +1021,7 @@ button { font: inherit; color: inherit; }
   cursor: not-allowed;
   pointer-events: none;
 }
-/* Нижняя строка подсказок */
+/* Bottom hint row */
 .chat__composer-bottom { display:flex; align-items:center; justify-content:space-between; gap:16px; }
 .chat__composer-hint { font-size:12px; color:var(--muted); display:flex; gap:12px; flex-wrap:wrap; }
 
@@ -1036,7 +1036,7 @@ button { font: inherit; color: inherit; }
   display: none;
   align-items: center;
   justify-content: center;
-  transition: none; /* убрали анимации, чтобы не мигал текст */
+  transition: none; /* removed animations so the text does not flicker */
 }
 
 .templates-modal[aria-hidden="false"] {
@@ -1048,7 +1048,7 @@ button { font: inherit; color: inherit; }
 }
 
 .templates-modal__dialog {
-  background: var(--surface-deep); /* Обновлено по новому требованию */
+  background: var(--surface-deep); /* Updated per new requirement */
   border: 1px solid var(--border);
   border-radius: 16px;
   width: 90vw;
@@ -1107,17 +1107,17 @@ button { font: inherit; color: inherit; }
   outline-offset: 2px;
 }
 
-/* Область вкладок без верх/низ разделителей, растянута по ширине */
+/* Tab area without top/bottom dividers, stretched full width */
 .templates-modal__tabs {
   display: flex;
-  padding: 8px 24px 0; /* уменьшен верхний отступ после header */
+  padding: 8px 24px 0; /* reduced top padding after header */
 }
 
-/* Таблетка: растягиваем на всю ширину; внутренние отступы формируют скруглённый блок */
+/* Pill: stretch full width; inner padding forms the rounded block */
 .templates-modal__tabs-container {
   display: flex;
   width: 100%;
-  background: var(--surface-tab); /* обновлённый фон таблетки */
+  background: var(--surface-tab); /* updated pill background */
   border: 1px solid var(--border);
   border-radius: 12px;
   padding: 4px 6px;
@@ -1138,17 +1138,17 @@ button { font: inherit; color: inherit; }
   z-index: 2;
   white-space: nowrap;
   min-width: 120px;
-  display: flex; /* выравниваем иконку и текст в одну линию */
-  align-items: center; /* вертикальное выравнивание */
-  justify-content: center; /* центрирование содержимого */
-  gap: 6px; /* контролируем расстояние между иконкой и текстом */
+  display: flex; /* align icon and text on one line */
+  align-items: center; /* vertical alignment */
+  justify-content: center; /* centering of content */
+  gap: 6px; /* control the spacing between icon and text */
 }
 
-/* Hover полностью убран: никаких визуальных изменений для неактивных вкладок */
+/* Hover fully removed: no visual changes for inactive tabs */
 
 .templates-modal__tab[aria-selected="true"] {
   color: var(--white);
-  background: var(--surface-deep); /* фон активной вкладки */
+  background: var(--surface-deep); /* active tab background */
   box-shadow: inset 0 0 0 1px var(--white-a4);
 }
 
@@ -1157,7 +1157,7 @@ button { font: inherit; color: inherit; }
   outline-offset: 2px;
 }
 
-/* Иконки во вкладках */
+/* Icons in tabs */
 .templates-modal__tab-icon { width:16px; height:16px; flex-shrink:0; display:block; }
 
 .templates-modal__content {
@@ -1165,7 +1165,7 @@ button { font: inherit; color: inherit; }
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  background: var(--surface-deep); /* общий фон контента */
+  background: var(--surface-deep); /* common content background */
 }
 
 .templates-modal__tab-panel {
@@ -1198,13 +1198,13 @@ button { font: inherit; color: inherit; }
   align-items: flex-start;
   gap: 16px;
   transition: border-color 0.15s ease, background-color 0.15s ease;
-  cursor: pointer; /* указатель при наведении */
+  cursor: pointer; /* pointer on hover */
 }
 
-/* Hover эффекты для элементов списка шаблонов отключены по требованию */
+/* Hover effects for template list items disabled by requirement */
 .template-item:hover {
-  background: var(--hover-translucent); /* полупрозрачная подсветка */
-  border-color: var(--surface-tab); /* границу не меняем */
+  background: var(--hover-translucent); /* translucent highlight */
+  border-color: var(--surface-tab); /* keep the border unchanged */
 }
 
 .template-item__content {
@@ -1261,7 +1261,7 @@ button { font: inherit; color: inherit; }
   outline-offset: 2px;
 }
 
-/* Цвета иконок по умолчанию */
+/* Default icon colors */
 .template-action-btn--copy,
 .template-action-btn--edit {
   color: var(--white);
@@ -1309,7 +1309,7 @@ button { font: inherit; color: inherit; }
 }
 
 .template-form__input {
-  background: var(--surface-deep); /* унификация с контейнером */
+  background: var(--surface-deep); /* unified with the container */
   border: 1px solid var(--surface-tab);
   border-radius: 8px;
   padding: 12px 14px;
@@ -1353,7 +1353,7 @@ button { font: inherit; color: inherit; }
 .template-form__actions {
   display: flex;
   gap: 12px;
-  justify-content: flex-start; /* выравнивание кнопок влево */
+  justify-content: flex-start; /* align buttons to the left */
 }
 
 .template-form__btn {
@@ -1409,9 +1409,9 @@ button { font: inherit; color: inherit; }
 /* ====== TEMPLATES MODAL DIVIDER ====== */
 .templates-modal__divider {
   position: relative;
-  height: 12px; /* визуальный отступ + линия внутри */
-  background: var(--surface-deep); /* фон всего блока */
-  margin: 8px 0 4px 0; /* обновлённые отступы */
+  height: 12px; /* visual offset + line inside */
+  background: var(--surface-deep); /* background of the whole block */
+  margin: 8px 0 4px 0; /* updated margins */
 }
 .templates-modal__divider::before {
   content: "";
@@ -1420,12 +1420,12 @@ button { font: inherit; color: inherit; }
   right: 0;
   top: 50%;
   height: 1px;
-  background: var(--surface-tab); /* сама линия */
+  background: var(--surface-tab); /* the line itself */
   transform: translateY(-50%);
 }
 
 /* ====== TEMPLATES MODAL HINT ====== */
-/* Заменено на shortcuts блок */
+/* Replaced by the shortcuts block */
 .templates-modal__shortcuts {
   display: flex;
   flex-wrap: wrap;
@@ -1450,7 +1450,7 @@ button { font: inherit; color: inherit; }
 .templates-modal__shortcut-label { color: var(--muted); }
 .chat__composer-hint { font-size:12px; color:var(--text-muted-alt); display:flex; gap:12px; flex-wrap:wrap; }
 
-/* ====== Pending attachments (локальные, до отправки) ====== */
+/* ====== Pending attachments (local, before sending) ====== */
 .chat__pending { display:flex; flex-wrap:wrap; gap:10px; margin-top:4px; }
 .pending-attach { position:relative; background:var(--panel-2); border:1px solid var(--border); border-radius:10px; padding:8px 10px; display:flex; flex-direction:row; align-items:stretch; gap:10px; min-width:180px; max-width:240px; }
 .pending-attach--img { padding:6px; }
@@ -1471,18 +1471,18 @@ button { font: inherit; color: inherit; }
 .pending-attach--error { border-color:var(--danger); }
 @keyframes spin { to { transform:rotate(360deg); } }
 
-/* ====== СООБЩЕНИЯ В ЧАТЕ ======
-   Семантика:
-     .msg -- общий контейнер
-       модификаторы: --client (сообщение отправителя), --agent, --bot, --operator
-     .msg__bubble -- визуальный контейнер контента
-     .msg__author -- строка с иконкой и надписью (только для bot/operator)
-     .msg__text -- параграф текста
-     .msg__meta -- время
-     .msg__attachments -- блок вложений
+/* ====== CHAT MESSAGES ======
+   Semantics:
+     .msg -- common container
+       modifiers: --client (sender message), --agent, --bot, --operator
+     .msg__bubble -- visual content container
+     .msg__author -- row with icon and label (bot/operator only)
+     .msg__text -- text paragraph
+     .msg__meta -- time
+     .msg__attachments -- attachments block
 */
 .msg { display:flex; flex-direction:column; gap:6px; max-width:70%; }
-/* Теперь сообщения клиента (client) слева, а бота/оператора справа */
+/* Now client messages are on the left, bot/operator on the right */
 .msg--client { align-self:flex-start; }
 .msg--agent { align-self:flex-end; }
 
@@ -1498,43 +1498,43 @@ button { font: inherit; color: inherit; }
 .msg--operator .msg__bubble { background:var(--msg-bubble-bg); }
 
 /* === Overrides: Message redesign (client + agent unified container) === */
-/* Клиент: новый фон у пузыря (актуальный) & граница */
+/* Client: new bubble background (current) & border */
 .msg--client .msg__bubble { background:var(--msg-client-bg); border-color:var(--msg-client-border); }
 
 .msg--agent { background:var(--msg-agent-bg); border:1px solid var(--msg-agent-border); border-radius:14px; padding:14px 16px; gap:8px; }
-/* Вложенный пузырь внутри агентского сообщения больше не нужен визуально */
+/* Nested bubble inside the agent message is no longer needed visually */
 .msg--agent .msg__bubble { background:transparent !important; border:0 !important; padding:0; border-radius:0; }
 .msg--agent .msg__author { margin:0; }
 
-/* Слегка смягчим разделитель файлов внутри агентского блока (на тёмном фоне) */
-/* Удалены старые agent overrides для файлов; теперь управляем через токены */
+/* Slightly soften the file divider inside the agent block (on dark background) */
+/* Old agent file overrides removed; now managed via tokens */
 
-/* Конец overrides */
+/* End of overrides */
 
-/* Дополнительный override: фон сообщений ОПЕРАТОРА = акцент приложения */
+/* Additional override: OPERATOR message background = app accent */
 .msg--operator { background: var(--accent); border-color: var(--accent); }
 .msg--operator .msg__author { color: var(--white); }
-/* Сделаем подписи (meta) чуть более светлыми внутри яркого фона для контраста */
+/* Make captions (meta) slightly lighter inside the bright background for contrast */
 .msg--operator .msg__meta { color: var(--operator-meta); }
 
-/* === Layout fix: ограничиваем скролл только телом чата === */
-/* Проблема: при первой отправке сообщение увеличивало высоту панели и сам #chatPanel становился скролл-контейнером. */
+/* === Layout fix: restrict scrolling to the chat body only === */
+/* Problem: on first send the message increased the panel height and #chatPanel itself became the scroll container. */
 .chat { overflow:hidden; display:flex; flex-direction:column; height:100%; }
-/* flex-basis:0 предотвращает «рост» по контенту и фиксирует футер на месте с самого начала */
+/* flex-basis:0 prevents content-based "growth" and pins the footer in place from the start */
 .chat__body { flex:1 1 0%; overflow-y:auto; min-height:0; }
 
 .msg__text { white-space:pre-wrap; word-wrap:break-word; overflow-wrap:break-word; font-size:14px; line-height:1.5; color: var(--white); }
 .msg__meta { font-size:12px; color: var(--text-muted-alt); }
 .msg__meta time { font:inherit; color:inherit; }
 
-/* Вложения */
+/* Attachments */
 .msg__attachments { display:flex; flex-direction:column; gap:8px; }
-/* (legacy initial styles for .msg-file удалены) */
+/* (legacy initial styles for .msg-file removed) */
 .msg-file__body { display:flex; flex-direction:column; min-width:0; }
 .msg-file__name { font-size:13px; font-weight:500; color:var(--white); max-width:360px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .msg-file__size { font-size:11px; color: var(--text-muted-alt); }
 /* === NEW: inline image attachment (variant 1) === */
-/* Увеличены размеры + минимизированы горизонтальные внешние отступы */
+/* Sizes increased + horizontal outer margins minimized */
 .msg-image { margin:4px var(--inline-image-side-gap) 0 var(--inline-image-side-gap); max-width:var(--inline-image-max-width); max-height:var(--inline-image-max-height); border-radius:14px; overflow:hidden; display:inline-block; position:relative; line-height:0; }
 .msg-image img { display:block; width:100%; height:100%; object-fit:cover; transition:transform .15s ease; }
 .msg-image:hover img { transform:scale(1.05); }
@@ -1542,14 +1542,14 @@ button { font: inherit; color: inherit; }
 .msg-image__download { position:absolute; top:6px; right:6px; width:28px; height:28px; display:flex; align-items:center; justify-content:center; background:var(--image-download-bg); backdrop-filter:blur(4px); border-radius:6px; opacity:0; transform:translateY(-4px); transition:opacity .15s ease, transform .15s ease; text-decoration:none; }
 .msg-image__download img { display:none; }
 .msg-image__download-icon { width:16px; height:16px; stroke:var(--white); color:var(--white); display:block; pointer-events:none; }
-/* На случай если браузер игнорирует filter (например, already white) форсируем stroke/fill через mask подход не трогаем: svg уже белый. */
+/* In case the browser ignores filter (e.g. already white) we force stroke/fill via mask; we do not touch the approach: svg is already white. */
 .msg-image:hover .msg-image__download, .msg-image:focus-within .msg-image__download { opacity:1; transform:translateY(0); }
 .msg-image__download:focus { outline:2px solid var(--focus-color); outline-offset:2px; }
 .msg-image--clickable{ cursor:pointer; }
 .msg-image--clickable:hover::after{ content:""; position:absolute; inset:0; background:var(--image-hover-overlay); }
 
 /* === UPDATED: file attachment block (variant 2) === */
-/* === ЕДИНЫЙ БАЗОВЫЙ СТИЛЬ ДЛЯ ФАЙЛОВЫХ ВЛОЖЕНИЙ === */
+/* === SINGLE BASE STYLE FOR FILE ATTACHMENTS === */
 .msg-file { display:flex; align-items:center; gap:10px; background:var(--msg-file-bg); border:1px solid var(--msg-file-border); border-radius:12px; padding:10px 12px; }
 .msg-file__icon { width:32px; height:32px; display:grid; place-items:center; background:var(--msg-file-icon-bg); border-radius:8px; color:var(--white); flex-shrink:0; }
 .msg-file__icon img { width:16px; height:16px; display:block; object-fit:contain; }
@@ -1559,12 +1559,12 @@ button { font: inherit; color: inherit; }
 .msg-file__download:focus-visible { outline:2px solid var(--accent); outline-offset:2px; }
 .msg-file__name { color: var(--white); }
 .msg-file__size { color: var(--text-muted-alt); }
-/* === Контекст оператора: переопределяем токены на акцент === */
-/* Оператор: полупрозрачная подложка и стандартная граница */
+/* === Operator context: override tokens to accent === */
+/* Operator: translucent background and standard border */
 .msg--operator { --msg-file-bg: var(--operator-file-bg); --msg-file-icon-bg: var(--operator-file-bg); --msg-file-border: var(--surface-tab); }
-/* Если потребуется другой оттенок для иконки, можно ввести --msg-file-icon-bg-alt и использовать внутри .msg--operator .msg-file__icon */
+/* If a different icon shade is needed, introduce --msg-file-icon-bg-alt and use it inside .msg--operator .msg-file__icon */
 .image-modal__overlay{ position:fixed; inset:0; background:var(--modal-overlay-bg); backdrop-filter:blur(2px); z-index:1000; display:flex; align-items:center; justify-content:center; padding:40px 32px; animation:fadeIn .18s ease; }
-/* Переменные для масштабирования предпросмотра */
+/* Variables for preview scaling */
 :root { --image-preview-max-width: 960px; --image-preview-max-height:84vh; }
 .image-modal{ width:100%; max-width:min(var(--image-preview-max-width),92vw); background:var(--panel); border:1px solid var(--border); border-radius:16px; box-shadow:var(--modal-shadow-strong); display:flex; flex-direction:column; position:relative; }
 .image-modal__close{ position:absolute; top:10px; right:10px; width:28px; height:28px; display:inline-grid; place-items:center; border-radius:8px; background:var(--modal-close-bg); color:var(--white); border:1px solid var(--modal-close-border); cursor:pointer; transition:background .15s ease,border-color .15s ease; }
@@ -1613,12 +1613,12 @@ button { font: inherit; color: inherit; }
 #logoutCancel.confirm-modal__btn:hover { background:var(--accent); color:var(--white); transition:background-color .15s ease, color .15s ease; }
 .confirm-modal__btn:focus-visible { outline:2px solid var(--accent); outline-offset:2px; }
 .confirm-modal__btn--danger { background:var(--danger); color:#fff; border-color:var(--danger); font-weight:600; }
-/* Без визуального эффекта при hover для опасной кнопки */
+/* No visual effect on hover for the danger button */
 .confirm-modal__btn--danger:active { filter:brightness(.92); }
 .confirm-modal__btn[disabled], .confirm-modal__btn:disabled { opacity:.6; cursor:not-allowed; }
 .btn__spinner { width:16px; height:16px; border:2px solid rgba(255,255,255,.4); border-top-color:#fff; border-radius:50%; animation: spin .75s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
-/* Дополнительная переменная цвета для предупреждающей иконки модалки */
+/* Extra color variable for the modal warning icon */
 :root { --warning-accent: #f97316; }
 
 /* ====== LOGIN SCREEN ====== */
@@ -1630,14 +1630,14 @@ button { font: inherit; color: inherit; }
   justify-content: center;
   overflow-y: auto;
   padding: 80px 16px 40px;
-  background: #131416; /* более глубокий фон чем var(--bg) для отделения */
+  background: #131416; /* deeper background than var(--bg) for separation */
   z-index: 4000;
 }
 .login-screen[hidden]{ display:none !important; }
 
 .login-card {
   width: 100%;
-  max-width: 460px; /* как на макете — умеренная ширина */
+  max-width: 460px; /* as in the mockup — moderate width */
   background: #18191c;
   border: 1px solid var(--border-color);
   border-radius: 10px;
@@ -1712,7 +1712,7 @@ button { font: inherit; color: inherit; }
   line-height: 1.35;
 }
 
-/* Удаляем нежелательный outline при автопрограммном фокусе на списке диалогов */
+/* Remove the unwanted outline on programmatic focus of the dialog list */
 #dialogList:focus { outline: none; }
 #dialogList:focus-visible { outline: none; }
 
@@ -1724,8 +1724,8 @@ html.login-active #loginScreen { display:flex; }
 }
 
 /* ====== SERVICE TOAST NOTIFICATIONS ======
-   Контейнер фиксирован в правом нижнем углу. Каждый тост — карточка с заголовком и текстом.
-   Анимации: появление (slide + fade), исчезновение (fade + slight translate).
+   Container is fixed in the bottom right corner. Each toast is a card with a title and text.
+   Animations: appear (slide + fade), disappear (fade + slight translate).
 */
 .toast-container { position:fixed; z-index:5000; right:16px; bottom:16px; display:flex; flex-direction:column; gap:12px; max-width:360px; pointer-events:none; }
 .toast-container { max-width:none; }

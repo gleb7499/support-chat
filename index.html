@@ -51,7 +51,7 @@
     </form>
   </div>
   <div class="shell">
-    <!-- ХЕДЕР -->
+    <!-- HEADER -->
     <header class="app-header">
       <div class="app-header__left">
         <span class="app-header__icon" aria-hidden="true">
@@ -71,11 +71,11 @@
       </div>
     </header>
 
-    <!-- ОСНОВНОЙ ЛЕЙАУТ: САЙДБАР + РАБОЧАЯ ОБЛАСТЬ -->
+    <!-- MAIN LAYOUT: SIDEBAR + WORK AREA -->
   <div class="app" id="mainContent">
-      <!-- ЛЕВАЯ КОЛОНКА -->
+      <!-- LEFT COLUMN -->
       <aside class="sidebar" aria-label="Список диалогов">
-        <!-- В САЙДБАРЕ — ТОЛЬКО СТРОКА ПРОЕКТА -->
+        <!-- IN THE SIDEBAR — ONLY THE PROJECT ROW -->
         <div class="sidebar__project">
           <label class="sidebar__label" for="projectSelect">Проект:</label>
 
@@ -131,7 +131,7 @@
         </div>
 
   <ul class="dialog-list" id="dialogList" role="listbox" aria-label="Активные диалоги" tabindex="0">
-          <!-- Элементы списка рендерятся JS -->
+          <!-- List items are rendered by JS -->
         </ul>
 
         <footer class="sidebar__footer">
@@ -155,7 +155,7 @@
         </footer>
       </aside>
 
-      <!-- ПРАВАЯ ОБЛАСТЬ -->
+      <!-- RIGHT AREA -->
       <main class="workspace" aria-live="polite" aria-busy="false">
         <div class="workspace__empty">
           <h2 class="workspace__title">Выберите диалог</h2>
@@ -164,27 +164,27 @@
           </p>
         </div>
 
-        <!-- Правый блок чата: отображается только когда выбран диалог -->
+        <!-- Right chat block: shown only when a dialog is selected -->
   <div class="chat" id="chatPanel" hidden>
-          <!-- Шапка чата -->
+          <!-- Chat header -->
           <header class="chat__header" id="chatHeader">
             <div class="chat__header-left">
               <h2 class="chat__user" id="chatUser">user_XXX</h2>
-              <div class="chat__meta" id="chatMeta"><!-- meta заполняется JS: платформа • версия • UID --></div>
+              <div class="chat__meta" id="chatMeta"><!-- meta is filled by JS: platform • version • UID --></div>
             </div>
             <div class="chat__header-right">
               <span class="badge" id="chatBadge" aria-hidden="false">Нейросеть</span>
             </div>
           </header>
 
-          <!-- Тело чата (сообщения) -->
+          <!-- Chat body (messages) -->
             <div class="chat__body" id="chatBody" role="log" aria-live="polite" aria-relevant="additions" aria-atomic="false">
-              <!-- Сообщения чата рендерятся динамически JS (MessageStore) -->
+              <!-- Chat messages are rendered dynamically by JS (MessageStore) -->
             </div>
 
-          <!-- Нижняя область (футер) -->
+          <!-- Bottom area (footer) -->
           <footer class="chat__footer" id="chatFooter">
-            <!-- Динамически наполняется JS: баннер ИИ или плейсхолдер оператора -->
+            <!-- Dynamically filled by JS: AI banner or operator placeholder -->
           </footer>
         </div>
       </main>

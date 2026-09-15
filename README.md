@@ -1,75 +1,85 @@
 # Support Chat (Prototype)
 
-Небольшой фронтенд‑прототип панели оператора поддержки (активные / архивные диалоги, список сообщений, шаблоны ответов, модалки подтверждений, toast‑уведомления).
+A small frontend prototype of a support operator panel (active / archived dialogs, message list, reply templates, confirmation modals, toast notifications).
 
-> Бэкенд пока эмулируется mock‑данными и локальными сторами в JS.
+> The backend is currently emulated with mock data and local in-JS stores.
 
-## Быстрый старт
-1. Откройте файл `index.html` в любом современном браузере (Chrome, Firefox, Edge).
-2. Для имитации входа используйте произвольный логин (мин. 3 символа, латиница/цифры/._-) и пароль (мин. 6 символов).
-3. После входа доступен список активных диалогов. Архив переключается через меню проекта (три точки → «Открыть архивные чаты»).
+## Screenshots
 
-## Архитектура (кратко)
-- `scripts.js` — монолитный файл модулей (IIFE) без сборщика.
-- Модули: Auth, ActiveDialogsApp, LogoutConfirm, UnsubscribeModal, ServiceToasts.
-- Данные диалогов / сообщений — mock (массива + in‑memory MessageStore). Архив сидируется лениво.
-- Шаблоны ответов — локальный store (CRUD) в памяти.
-- Сообщения поддерживают вложения (inline image / file) + апгрейд/фоллбек отображения.
+| Login | Operator panel |
+|-------|----------------|
+| ![Login screen](images/screenshot-login.png) | ![Active dialogs](images/screenshot-dialogs.png) |
 
-## Публичный API
-Все стабильные функции агрегированы в объект `window.AppAPI` (versioned). Существующие глобалы (`Auth`, `showServiceNotification`, `app.dialogs` и т.п.) оставлены для обратной совместимости, но рекомендуется использовать единый API.
+| Chat with attachments | Reply templates |
+|-----------------------|-----------------|
+| ![Chat](images/screenshot-chat.png) | ![Templates](images/screenshot-templates.png) |
 
-Версия `1.0.1` (patch): добавлена поддержка вложений (inline image / file) для сообщений клиента (`author: 'client'`). Ранее вложения у клиента игнорировались при рендере.
+## Quick Start
+1. Open `index.html` in any modern browser (Chrome, Firefox, Edge).
+2. To emulate login, use any username (min. 3 characters, Latin letters/digits/`._-`) and password (min. 6 characters).
+3. After login, the list of active dialogs is available. The archive is switched via the project menu (three dots → "Open archived chats").
+
+## Architecture (brief)
+- `scripts.js` — a monolithic file of modules (IIFE), no bundler.
+- Modules: Auth, ActiveDialogsApp, LogoutConfirm, UnsubscribeModal, ServiceToasts.
+- Dialog / message data is mock (arrays + in-memory MessageStore). The archive is seeded lazily.
+- Reply templates — local in-memory store (CRUD).
+- Messages support attachments (inline image / file) with upgrade / fallback rendering.
+
+## Public API
+All stable functions are aggregated in the `window.AppAPI` object (versioned). Existing globals (`Auth`, `showServiceNotification`, `app.dialogs`, etc.) are kept for backward compatibility, but the unified API is recommended.
+
+Version `1.0.1` (patch): added attachment support (inline image / file) for client messages (`author: 'client'`). Previously client attachments were ignored during rendering.
 
 ```js
 console.log(AppAPI.version)         // '1.0.0'
 ```
 
 ### Auth (`AppAPI.auth`)
-| Метод | Описание |
+| Method | Description |
 |-------|----------|
-| `isAuthed()` | Возвращает `true/false` — есть ли токен (mock). |
-| `getPhase()` | Текущая фаза state machine: `unauthenticated | auth-loading | auth-failed | authenticated`. |
-| `showLogin()` | Показать экран логина. |
-| `showApp()` | Форсировать показ приложения (используется после успешного входа). |
-| `logout()` | Выйти (очищает токен и возвращает к экрану входа). |
+| `isAuthed()` | Returns `true/false` — whether a (mock) token exists. |
+| `getPhase()` | Current state machine phase: `unauthenticated | auth-loading | auth-failed | authenticated`. |
+| `showLogin()` | Show the login screen. |
+| `showApp()` | Force-show the application (used after a successful login). |
+| `logout()` | Log out (clears the token and returns to the login screen). |
 
 ### Dialogs (`AppAPI.dialogs`)
-| Метод | Описание |
+| Method | Description |
 |-------|----------|
-| `select(id)` | Выбрать диалог и отобразить его сообщения. |
-| `getById(id)` | Получить объект диалога (активный или архивный). |
-| `toggleArchive()` | Переключить режим Active ↔ Archive (перерисовка списка). |
-| `switchToOperator(id, {source})` | Перевести диалог с бота на оператора (обновляет бейдж, футер). |
-| `timers.set(id, value, opts)` | Установить таймер-пилюлю (текст, `opts.datetime`, авто‑показ). |
-| `timers.show(id)` | Показать таймер. |
-| `timers.hide(id)` | Скрыть таймер. |
+| `select(id)` | Select a dialog and display its messages. |
+| `getById(id)` | Get the dialog object (active or archived). |
+| `toggleArchive()` | Toggle Active ↔ Archive mode (re-renders the list). |
+| `switchToOperator(id, {source})` | Hand a dialog over from the bot to an operator (updates the badge and footer). |
+| `timers.set(id, value, opts)` | Set a timer pill (text, `opts.datetime`, auto-show). |
+| `timers.show(id)` | Show the timer. |
+| `timers.hide(id)` | Hide the timer. |
 
 ### Messages (`AppAPI.messages`)
-| Метод | Описание |
+| Method | Description |
 |-------|----------|
-| `add(dialogId, { author, text, attachments, createdAt })` | Локально добавить сообщение (демо) в указанный диалог. Возвращает объект сообщения. `author: client|bot|operator|system`. В реальной интеграции заменить на отправку на сервер и последующую синхронизацию. |
+| `add(dialogId, { author, text, attachments, createdAt })` | Locally add a message (demo) to the given dialog. Returns the message object. `author: client|bot|operator|system`. In a real integration, replace with a server send followed by synchronization. |
 
-#### Формат вложения (attachments[])
+#### Attachment format (attachments[])
 ```ts
 {
   id: string | number,
   name: string,
   size?: '123 KB',
   contentType?: string,        // MIME
-  url?: string,                // для inline preview
-  downloadUrl?: string,        // ссылка скачивания
+  url?: string,                // for inline preview
+  downloadUrl?: string,        // download link
   displayHint?: 'inline-image' | 'file'
 }
 ```
-Если `displayHint` не указан, система пытается классифицировать сама (image/* и размер <= 800KB → inline image).
+If `displayHint` is not specified, the system tries to classify it itself (image/* and size <= 800KB → inline image).
 
-Пример добавления клиентского сообщения с вложениями (c версии 1.0.1):
+Example of adding a client message with attachments (since version 1.0.1):
 ```js
 AppAPI.dialogs.select(3);
 AppAPI.messages.add(3, {
   author: 'client',
-  text: 'Вот файл и скриншот',
+  text: 'Here is a file and a screenshot',
   attachments: [
     {
       id: 'cimg1',
@@ -90,69 +100,69 @@ AppAPI.messages.add(3, {
 ```
 
 ### Templates (`AppAPI.templates`)
-| Метод | Описание |
+| Method | Description |
 |-------|----------|
-| `open()` | Открыть модалку шаблонов (CRUD через UI). |
+| `open()` | Open the templates modal (CRUD via the UI). |
 
 ### Modals (`AppAPI.modals`)
-| Метод | Описание |
+| Method | Description |
 |-------|----------|
-| `logout()` | Открыть модалку подтверждения выхода. |
-| `unsubscribe(dialogId)` | Открыть модалку «Отменить подписку» для пользователя диалога. |
+| `logout()` | Open the logout confirmation modal. |
+| `unsubscribe(dialogId)` | Open the "Unsubscribe" modal for the dialog's user. |
 
 ### Notifications (`AppAPI.notify`)
 ```
-AppAPI.notify('Сохранено', 'Изменения применены');
-AppAPI.notify('Инфо без текста');
+AppAPI.notify('Saved', 'Changes applied');
+AppAPI.notify('Info without text');
 ```
-Опции таймаута (legacy): `{ timeout: 6000 }`.
+Timeout options (legacy): `{ timeout: 6000 }`.
 
 ### Health Check
 ```
 AppAPI.ping(); // { ok:true, ts: 173..., phase: 'authenticated' }
 ```
 
-## Примеры использования
+## Usage Examples
 ```js
-// Выбрать диалог и добавить сообщение оператора
+// Select a dialog and add an operator message
 AppAPI.dialogs.select(3);
-AppAPI.messages.add(3, { author:'operator', text:'Добрый день! Чем могу помочь?' });
+AppAPI.messages.add(3, { author:'operator', text:'Good afternoon! How can I help?' });
 
-// Перевод с бота на оператора
+// Hand over from bot to operator
 AppAPI.dialogs.switchToOperator(3);
 
-// Установить таймер SLA
-AppAPI.dialogs.timers.set(3, '15м', { datetime: new Date().toISOString() });
+// Set an SLA timer
+AppAPI.dialogs.timers.set(3, '15m', { datetime: new Date().toISOString() });
 
-// Показать шаблоны
+// Show templates
 AppAPI.templates.open();
 
-// Уведомление
-AppAPI.notify('Готово', 'Шаблон сохранён');
+// Notification
+AppAPI.notify('Done', 'Template saved');
 ```
 
-## События браузера
+## Browser Events
 | Event | detail |
 |-------|--------|
-| `auth:change` | `{ phase, error }` — диспатчится при смене auth состояния. |
+| `auth:change` | `{ phase, error }` — dispatched when the auth state changes. |
 
-Пример: 
+Example:
 ```js
 window.addEventListener('auth:change', e => console.log('Auth phase:', e.detail.phase));
 ```
 
-## Ограничения / Что mock
-- Нет реального сетевого слоя (login / сообщения / шаблоны).
-- Идентификаторы сообщений локально генерируются (`temp:*`).
-- Перевод на оператора не вызывает сервер — просто мутация локального массива.
-- Превью изображений использует публичный `picsum.photos` (можно заменить на CDN).
+## Limitations / What Is Mocked
+- No real network layer (login / messages / templates).
+- Message ids are generated locally (`temp:*`).
+- Handoff to an operator does not call the server — it is just a mutation of a local array.
+- Image previews use the public `picsum.photos` (can be replaced with a CDN).
 
-## Как адаптировать под реальный backend
-1. Заменить `loginRequest` на fetch к API (+ обработка ошибок).
-2. Перевести `MOCK_DIALOGS` и `ARCHIVE_DIALOGS` в загрузку списка (с пагинацией).
-3. Обновить `MessageStore` на двустороннюю синхронизацию (WebSocket / SSE / polling).
-4. Вынести TemplatesStore на REST (CRUD endpoints) + optimistic UI.
-5. Добавить статусы доставки (sent/delivered/read) на основе событий сервера.
+## How to Adapt to a Real Backend
+1. Replace `loginRequest` with a fetch to the API (+ error handling).
+2. Move `MOCK_DIALOGS` and `ARCHIVE_DIALOGS` to a paginated list endpoint.
+3. Upgrade `MessageStore` to two-way synchronization (WebSocket / SSE / polling).
+4. Move TemplatesStore to REST (CRUD endpoints) + optimistic UI.
+5. Add delivery statuses (sent/delivered/read) based on server events.
 
-## Лицензирование / Передача
-Если не оговорено отдельно — считать код поставляемым **as-is** в рамках фриланс‑задачи; дальнейшая модульность может быть доработана отдельно.
+## Licensing / Handover
+Unless agreed otherwise, consider the code delivered **as-is** as part of a freelance task; further modularity work can be done separately.

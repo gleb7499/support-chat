@@ -1,8 +1,8 @@
 /* ====== Auth / Login Screen Module ======
-   Архитектурные принципы:
-   - Не вмешиваемся в существующий ActiveDialogsApp: просто скрываем .shell пока нет токена.
-   - Изоляция через немедленное выполнение и экспорт window.Auth (минимально).
-   - Храним «токен» в localStorage (mock). Для реальной интеграции заменить loginRequest().
+   Architectural principles:
+   - We do not touch the existing ActiveDialogsApp: just hide .shell until a token exists.
+   - Isolation via immediate invocation and exporting window.Auth (minimal).
+   - Store the "token" in localStorage (mock). Replace loginRequest() for real integration.
 */
 (function AuthController(){
   const STORAGE_KEY = 'authToken';
@@ -25,12 +25,12 @@
     if(authPhase === phase && error === lastAuthError) return;
     authPhase = phase; lastAuthError = error;
     const root = document.documentElement;
-    // снимаем старые классы фаз
+    // remove old phase classes
     root.classList.remove('auth-phase--unauthenticated','auth-phase--auth-loading','auth-phase--auth-failed','auth-phase--authenticated');
     root.classList.add(`auth-phase--${phase}`);
-    // визуальное применение
+    // visual apply
     applyPhase();
-    // событие
+    // event
     window.dispatchEvent(new CustomEvent('auth:change', { detail:{ phase: authPhase, error:lastAuthError }}));
   }
 
@@ -43,7 +43,7 @@
       shell.style.pointerEvents = '';
     } else {
       loginScreen.hidden = false;
-      // блокируем фон только один раз если ещё не установлен inert
+      // block the background only once if inert is not yet set
       if(!shell.hasAttribute('inert')) shell.setAttribute('inert','');
       shell.style.pointerEvents = 'none';
     }
@@ -71,7 +71,7 @@
     document.documentElement.classList.add('login-active');
     setAuthPhase('unauthenticated');
     setTimeout(()=> usernameInput?.focus(), 30);
-    // Fallbackы на случай гонок рендера / стилей
+    // Fallbacks for render/style race conditions
     requestAnimationFrame(()=>{
       if(document.documentElement.classList.contains('login-active') && loginScreen.hidden){
         console.warn('[Auth] rf fallback: force show login');
@@ -89,7 +89,7 @@
   function showApp(){
     document.documentElement.classList.remove('login-active');
     setAuthPhase('authenticated');
-    // Фокус не ставим явно, чтобы не появлялась рамка вокруг списка
+    // Do not set focus explicitly so no outline appears around the list
   }
 
   function setLoading(flag){
@@ -140,7 +140,7 @@
     const pErr = validatePassword(passwordInput.value);
     setFieldError('loginUsername', uErr || '');
     setFieldError('loginPassword', pErr || '');
-    // Не показываем глобальную ошибку от live-валидации
+    // Do not show the global error from live validation
     if(submitBtn && authPhase !== 'auth-loading' && authPhase !== 'authenticated'){
       submitBtn.disabled = !!(uErr || pErr);
       submitBtn.classList.toggle('is-ready', !submitBtn.disabled);
@@ -152,9 +152,9 @@
 
   async function loginRequest(username,password){
     console.log('[Auth] loginRequest start', { uLen: username.length, pLen: password.length });
-    // MOCK: имитация реального запроса
+    // MOCK: simulates a real request
     await new Promise(r=>setTimeout(r,400));
-    // Успех если форма валидна (строгая валидация)
+    // Success if the form is valid (strict validation)
     if(!validateUsername(username) && !validatePassword(password)){
       const tokenObj = { token: 'mock-'+Date.now() };
       console.log('[Auth] loginRequest success', tokenObj);
@@ -167,7 +167,7 @@
   loginForm.addEventListener('submit', async (e)=>{
     e.preventDefault();
     clearErrors();
-    // Получаем элементы по id (name у полей другие, поэтому прямой доступ loginForm.loginUsername не работает)
+    // Get elements by id (fields have different name attributes, so direct access loginForm.loginUsername does not work)
     const usernameEl = document.getElementById('loginUsername');
     const passwordEl = document.getElementById('loginPassword');
     const username = usernameEl ? usernameEl.value.trim() : '';
@@ -178,7 +178,7 @@
     if(passErr) setFieldError('loginPassword', passErr);
     if(userErr || passErr){
       console.log('[Auth] validation blocked submit', { userErr, passErr });
-      // фокус на первое ошибочное поле
+      // focus the first invalid field
       if(userErr) usernameInput?.focus(); else if(passErr) passwordInput?.focus();
       return;
     }
@@ -192,7 +192,7 @@
       console.warn('[Auth] login error', err);
       if(globalError){ globalError.hidden = false; globalError.textContent = err.message || 'Ошибка входа'; }
       setAuthPhase('auth-failed', { error: err.message || 'Ошибка входа' });
-      // DEV fallback: если хэш #forceLogin — вход всё равно
+      // DEV fallback: if the hash is #forceLogin, login still works
       if(location.hash === '#forceLogin'){
         console.log('[Auth] #forceLogin fallback engaged');
         localStorage.setItem(STORAGE_KEY, 'forced-'+Date.now());
@@ -204,11 +204,11 @@
   const logoutBtn = document.getElementById('btnLogout');
   if(logoutBtn){
     logoutBtn.addEventListener('click', ()=>{
-      // Теперь выход подтверждается модалкой LogoutConfirm
+      // Now logout is confirmed by the LogoutConfirm modal
       if(window.LogoutConfirm && typeof window.LogoutConfirm.open === 'function'){
         window.LogoutConfirm.open({ trigger:'headerBtn' });
       } else {
-        // Fallback: если модуль не инициализировался, выполняем немедленный logout
+        // Fallback: if the module was not initialized, perform an immediate logout
         performLogout();
       }
     });
@@ -226,23 +226,23 @@
   window.Auth = { showLogin, showApp, isAuthed, getPhase: ()=>authPhase, performLogout };
 })();
 /*
-  ====== UI Модуль: Активные диалоги ======
-  Назначение:
-    - Рендер списка активных диалогов с пагинацией
-    - Управление кастомным select (проект)
-    - Popup-меню проекта и контекстное меню диалога
-    - Управление фокусом и ARIA для доступности
+  ====== UI Module: Active dialogs ======
+  Purpose:
+    - Rendering of the active dialog list with pagination
+    - Managing the custom select (project)
+    - Project popup menu and dialog context menu
+    - Focus management and ARIA for accessibility
 
-  Ключевые принципы:
-    - Единый state + кеш DOM ссылок
-    - Делегирование событий на контейнерах (список/документ)
-    - Все визуальные цвета — только через CSS, JS отвечает за классы/ARIA
+  Key principles:
+    - Single state + cached DOM references
+    - Event delegation on containers (list/document)
+    - All visual colors come from CSS only; JS handles classes/ARIA
 */
 (function ActiveDialogsApp() {
   'use strict';
 
-  /* ====== Mock-данные ======
-     В реальной интеграции заменить на загрузку с бэка и реактивный ререндер.
+  /* ====== Mock data ======
+     In a real integration, replace with backend loading and reactive re-render.
   */
   const MOCK_DIALOGS = [
     { id: 1, name: 'user_1', time: '10:15', platform: 'Android 13 • ФРИИ 1.3.7', origin: 'bot' },
@@ -272,7 +272,7 @@
     { id: 25, name: 'user_25', time: '00:50', platform: 'Android 11 • ФРИИ 2.4.7', origin: 'bot' },
   ];
 
-  // Архивные диалоги (демо данные). id > 1000 для избежания коллизий
+  // Archived dialogs (demo data). id > 1000 to avoid collisions
   const ARCHIVE_DIALOGS = [
     { id: 1001, name: 'archived_user_1', time: 'Вчера', platform: 'Android 13 • ФРИИ 1.3.7', origin: 'operator' },
     { id: 1002, name: 'archived_user_2', time: 'Вчера', platform: 'iOS 16.7 • ФРИИ 2.8.6', origin: 'bot' },
@@ -281,11 +281,11 @@
     { id: 1005, name: 'archived_user_5', time: '5 дн. назад', platform: 'Android 11 • ФРИИ 2.4.7', origin: 'operator' },
   ];
 
-  // Флаг ленивого сида архивных сообщений
+  // Lazy archive message seed flag
   let archiveSeeded = false;
 
-  /* ====== Состояние ======
-     Единый источник истины для пагинации и выбранного диалога.
+  /* ====== State ======
+     Single source of truth for pagination and the selected dialog.
   */
   const state = {
     pageSize: 10,
@@ -295,7 +295,7 @@
   };
 
   /* ====== DOM ======
-     Все необходимые элементы кешируются здесь для производительности.
+     All required elements are cached here for performance.
   */
   const dom = {
     list: document.getElementById('dialogList'),
@@ -303,7 +303,7 @@
     btnPrev: document.getElementById('btnPrev'),
     btnNext: document.getElementById('btnNext'),
     totalCounter: document.getElementById('totalCounter'),
-    // Правая панель чата
+    // Right chat panel
     workspaceEmpty: document.querySelector('.workspace__empty'),
     chatPanel: document.getElementById('chatPanel'),
     chatUser: document.getElementById('chatUser'),
@@ -321,39 +321,39 @@
     chatFooter: document.getElementById('chatFooter'),
   };
 
-  let dialogMenuAnchorBtn = null; // кнопка-источник для позиционирования меню диалога
+  let dialogMenuAnchorBtn = null; // anchor button for positioning the dialog menu
 
-  /* ====== Сообщения (store v2 — нормализованный) ======
-     Сообщение (расширяемый формат):
-       id: string (может быть 'temp:<n>' для локальных черновиков)
+  /* ====== Messages (store v2 — normalized) ======
+     Message (extensible format):
+       id: string (may be 'temp:<n>' for local drafts)
        dialogId: number
        author: 'client'|'bot'|'operator'|'system'
        text: string
        attachments?: Array<{
          id:string|number,
          name:string,
-         size?:string,              // строка вида '256 KB' — парсится best-effort
-         contentType?:string,       // MIME (используется для классификации image/*)
-         downloadUrl?:string,       // ссылка скачивания (может совпадать с url)
-         url?:string,               // исходный URL (например, CDN для картинки)
-         displayHint?:'inline-image'|'file' // ЯВНАЯ подсказка от бэка как отобразить
+         size?:string,              // string like '256 KB' — parsed best-effort
+         contentType?:string,       // MIME (used for image/* classification)
+         downloadUrl?:string,       // download link (may equal url)
+         url?:string,               // source URL (e.g. CDN for the image)
+         displayHint?:'inline-image'|'file' // EXPLICIT hint from the backend on how to render
        }>
        createdAt: string|Date
        status?: 'pending'|'sent'|'delivered'|'read'|'failed'
-       seq?: number (монотонный порядковый номер с сервера — зарезервировано)
-     Хранение:
+       seq?: number (monotonic sequence number from the server — reserved)
+     Storage:
        store[dialogId] = { byId:{}, order:[ids], lowestSeq, highestSeq }
-     Цели: быстрые обновления, дедупликация, будущая пагинация (append/prepend).
+     Goals: fast updates, deduplication, future pagination (append/prepend).
 
-     displayHint — расширяемый контракт с бекендом. Если задано:
-       'inline-image' — принудительно отображаем как встроенную картинку
-       'file'         — принудительно карточка файла
-     Если отсутствует, применяется эвристика: isInlineImage(att) => inline-image, иначе file.
-     Это позволяет бэку переопределять автоматическую логику (например, запретить inline для очень длинных панорам или SVG).
+     displayHint — extensible contract with the backend. If set:
+       'inline-image' — force rendering as an inline image
+       'file'         — force file card
+     If missing, the heuristic applies: isInlineImage(att) => inline-image, otherwise file.
+     This lets the backend override the automatic logic (e.g. disable inline for very long panoramas or SVG).
   */
   const MessageStore = (() => {
     const dialogs = Object.create(null); // dialogId -> bucket
-    let tempCounter = 1; // для генерации временных id (демо)
+    let tempCounter = 1; // for generating temporary ids (demo)
     const listeners = new Set();
 
     function ensure(dialogId){
@@ -423,7 +423,7 @@
       }
     }
 
-    // Точечное обновление полей вложения внутри сообщения
+    // Targeted update of attachment fields inside a message
     function updateAttachment(dialogId, msgId, attId, patch){
       const bucket = ensure(dialogId);
       const msg = bucket.byId[msgId];
@@ -464,11 +464,11 @@
   function formatMsgDate(date){
     try {
       const d = date instanceof Date ? date : new Date(date);
-      // Формат: 13 сентября 15:41
-      // toLocaleString для ru-RU с day+month+time даёт нужный регистр.
+      // Format: September 13, 15:41
+      // toLocaleString with ru-RU and day+month+time gives the desired register.
       const opts = { day:'numeric', month:'long', hour:'2-digit', minute:'2-digit' };
       let s = d.toLocaleString('ru-RU', opts);
-      // Удаляем возможные запятые (некоторые окружения вставляют)
+      // Strip possible commas (some environments insert them)
       s = s.replace(/,/g,'');
       return s;
     } catch(e){ return ''; }
@@ -489,19 +489,19 @@
   }
 
   /* ====== Attachments v2 ======
-     Типы отображения:
-       - Inline image (фотография) если contentType image/* и size <= INLINE_IMAGE_MAX_BYTES
-       - Файловый блок (универсальный) для остальных случаев
-     Порог и расширяемость вынесены в константы
+     Display types:
+       - Inline image (photo) if contentType image/* and size <= INLINE_IMAGE_MAX_BYTES
+       - File block (universal) for all other cases
+     Threshold and extensibility are extracted into constants
   */
-  const INLINE_IMAGE_MAX_BYTES = 800 * 1024; // 800KB порог (регулируемый)
+  const INLINE_IMAGE_MAX_BYTES = 800 * 1024; // 800KB threshold (adjustable)
   const IMAGE_MIME_PREFIX = 'image/';
   const IMAGE_EXTENSIONS = ['jpg','jpeg','png','webp','gif'];
 
   function isImageAttachment(att){
     if(!att) return false;
     if(att.contentType && att.contentType.startsWith(IMAGE_MIME_PREFIX)) return true;
-    // fallback по расширению
+    // fallback by extension
     if(att.name){
       const m = att.name.toLowerCase().match(/\.([a-z0-9]+)$/);
       if(m && IMAGE_EXTENSIONS.includes(m[1])) return true;
@@ -511,7 +511,7 @@
 
   function parseSizeToBytes(sizeStr){
     if(!sizeStr) return null;
-    // ожидаем форматы типа "123 KB" / "2.4 MB"
+    // expect formats like "123 KB" / "2.4 MB"
     const m = sizeStr.trim().match(/([0-9]+(?:\.[0-9]+)?)\s*(kb|mb|b)/i);
     if(!m) return null;
     const num = parseFloat(m[1]);
@@ -565,10 +565,10 @@
   }
 
   /* ====== Attachment Variant Resolver ======
-     Приоритет источника отображения:
-       1. att.displayHint (явно задано бекендом: 'inline-image' | 'file')
-       2. Автоклассификация (isInlineImage → inline-image, иначе file)
-     Возвращает строковое значение варианта для унифицированной обработки.
+     Display source priority:
+       1. att.displayHint (explicitly set by the backend: 'inline-image' | 'file')
+       2. Auto-classification (isInlineImage → inline-image, otherwise file)
+     Returns the string value of the variant for unified handling.
   */
   function classifyAttachmentVariant(att){
     if(!att) return 'file';
@@ -586,8 +586,8 @@
     const textHtml = `<div class="msg__text">${escapeHtml(msg.text)}</div>`;
     const metaHtml = `<div class="msg__meta"><time datetime="${new Date(msg.createdAt).toISOString()}">${formatMsgDate(msg.createdAt)}</time></div>`;
     if(msg.author === 'client'){
-      // Новая поддержка вложений для клиентских сообщений.
-      // Архитектурная политика едина: attachments рендерятся внутри пузыря между текстом и метой.
+      // New attachment support for client messages.
+      // Architectural policy is uniform: attachments render inside the bubble between text and meta.
       let attachmentsHtml = '';
       if(Array.isArray(msg.attachments) && msg.attachments.length){
         const parts = [];
@@ -635,7 +635,7 @@
     if(el) processMessageAttachments(dialogId, msg, el);
   }
 
-  // Backward совместимый интерфейс для текущего composer
+  // Backward-compatible interface for the current composer
   function addMessage(dialogId, { author, text, attachments = [], createdAt = new Date() }){
     const msg = MessageStore.addLocal(dialogId, { author, text, attachments, createdAt, status: author === 'operator' ? 'pending':'sent' });
     appendMessageToDom(dialogId, msg);
@@ -655,7 +655,7 @@
     }
     dom.chatBody.appendChild(frag);
     dom.chatBody.scrollTop = dom.chatBody.scrollHeight;
-    // Post-process вложения (апгрейд/фоллбек)
+    // Post-process attachments (upgrade/fallback)
     for(const m of list){
       const node = dom.chatBody.querySelector(`[data-msg-id="${m.id}"]`);
       if(node) processMessageAttachments(dialogId, m, node);
@@ -663,10 +663,10 @@
   }
 
   /* ====== Runtime Attachment Capability Check ======
-     Цель: гарантировать правило «или inline изображение, или карточка файла». Если:
-       - Мы попытались отобразить inline и загрузка изображения упала → фоллбек в карточку файла.
-       - У нас карточка файла, но URL потенциально указывает на изображение (по расширению/MIME) → пробуем загрузить и апгрейдим до inline.
-     Это делает поведение более надёжным против неточных contentType.
+     Goal: guarantee the "either inline image or file card" rule. If:
+       - We tried inline rendering and the image failed to load → fall back to a file card.
+       - We have a file card, but the URL potentially points to an image (by extension/MIME) → try loading it and upgrade to inline.
+     This makes the behavior more robust against inaccurate contentTypes.
   */
   function looksLikeImageUrl(url){
     if(!url) return false;
@@ -682,13 +682,13 @@
       if(!node) continue;
       const currentVariant = node.getAttribute('data-variant');
       const url = att.url || att.downloadUrl || node.getAttribute('data-url') || '';
-      // === Case 1: inline → проверяем onerror (установим обработчик если не установлен)
+      // === Case 1: inline → check onerror (install handler if not installed)
       if(currentVariant === 'inline-image'){
         const img = node.querySelector('img');
         if(img && !img.dataset._handler){
           img.dataset._handler = '1';
           img.addEventListener('error', ()=>{
-            // Фоллбек: заменить на file-attachment
+            // Fallback: replace with file-attachment
             const fallbackHtml = createFileAttachment({ ...att, displayHint:'file' });
             const wrap = document.createElement('div');
             wrap.innerHTML = fallbackHtml;
@@ -696,11 +696,11 @@
             MessageStore.updateAttachment(dialogId, msg.id, att.id, { displayHint:'file' });
           }, { once:true });
         }
-        continue; // inline проверяем только на ошибку
+        continue; // for inline, check error only
       }
-      // === Case 2: file → можем попытаться апгрейдить если это потенциально изображение
+      // === Case 2: file → we can try to upgrade if it is potentially an image
       if(currentVariant === 'file'){
-        // Сценарий: displayHint='file' принудительно НЕ апгрейдим
+        // Scenario: displayHint='file' — never upgrade
         if(att.displayHint === 'file') continue;
         if(!(att.displayHint === 'inline-image') && !(att.contentType && att.contentType.startsWith('image/')) && !looksLikeImageUrl(url)) continue;
         if(!url || url === '#') continue;
@@ -709,14 +709,14 @@
             testImg.loading = 'eager';
             testImg.decoding = 'async';
             testImg.addEventListener('load', ()=>{
-              // Апгрейд до inline-image
+              // Upgrade to inline-image
               const html = createInlineImageAttachment({ ...att, displayHint:'inline-image' });
               const wrap = document.createElement('div');
               wrap.innerHTML = html;
               node.replaceWith(wrap.firstElementChild);
               MessageStore.updateAttachment(dialogId, msg.id, att.id, { displayHint:'inline-image' });
             }, { once:true });
-            testImg.addEventListener('error', ()=>{ /* остаёмся в режиме file */ }, { once:true });
+            testImg.addEventListener('error', ()=>{ /* stay in file mode */ }, { once:true });
             testImg.src = url;
         } catch(e){ /* silent */ }
       }
@@ -724,7 +724,7 @@
   }
 
   function seedDemoMessages(){
-    // Если первый диалог уже имеет сообщения — считаем, что сид выполнен
+    // If the first dialog already has messages — consider the seed done
     if(MessageStore.getList(1).length) return;
 
     const intro = [
@@ -765,7 +765,7 @@
       const agentAuthor = dlg.origin === 'bot' ? 'bot' : 'operator';
       const batch = [
         { id:`m${dlg.id}a`, dialogId:dlg.id, author:'client', text:pick(intro), createdAt:t(120+dlg.id), status:'sent' },
-        // Сообщение агента с демонстрацией ДВУХ типов вложений (фиксировано для первых нескольких диалогов)
+        // Agent message demonstrating TWO attachment types (fixed for the first few dialogs)
         { id:`m${dlg.id}b`, dialogId:dlg.id, author:agentAuthor, text:pick(agentAuthor==='bot'?botReplies:opReplies,1), createdAt:t(118+dlg.id), status:'sent', attachments: (dlg.id <= 3) ? [
           { id:`f${dlg.id}img1`, name:`preview-${dlg.id}.png`, size:'120 KB', contentType:'image/png', url:'https://picsum.photos/seed/inline'+dlg.id+'/300/180', displayHint:'inline-image' },
           { id:`f${dlg.id}file1`, name:`report-${dlg.id}.pdf`, size:'256 KB', contentType:'application/pdf', displayHint:'file' }
@@ -774,20 +774,20 @@
         { id:`m${dlg.id}d`, dialogId:dlg.id, author:agentAuthor, text:'Передаю дальше, уточняю детали…', createdAt:t(70+dlg.id), status:'sent' },
         { id:`m${dlg.id}e`, dialogId:dlg.id, author:'client', text:pick(thanks,3), createdAt:t(10+dlg.id), status:'sent' }
       ];
-      // Дополнительное сообщение только с inline-image для каждого пятого диалога
+      // Extra message with only an inline-image for every fifth dialog
       if(dlg.id % 5 === 0){
         batch.splice(3,0,{ id:`m${dlg.id}imgOnly`, dialogId:dlg.id, author:agentAuthor, text:'Вот изображение по вашему вопросу.', createdAt:t(80+dlg.id), status:'sent', attachments:[{ id:`f${dlg.id}imgOnly`, name:`photo-${dlg.id}.jpg`, size:'200 KB', contentType:'image/jpeg', url:'https://picsum.photos/seed/photo'+dlg.id+'/240/160', displayHint:'inline-image' }] });
       }
-      // Дополнительное сообщение только с file вложением для каждого третьего диалога (если ещё нет файла в предыдущей вставке)
+      // Extra message with only a file attachment for every third dialog (if no file was in the previous insert)
       if(dlg.id % 3 === 0){
         batch.splice(4,0,{ id:`m${dlg.id}fileOnly`, dialogId:dlg.id, author:agentAuthor, text:'Прикрепляю файл с деталями.', createdAt:t(75+dlg.id), status:'sent', attachments:[{ id:`f${dlg.id}fileOnly`, name:`details-${dlg.id}.xlsx`, size:'512 KB', contentType:'application/vnd.ms-excel', displayHint:'file' }] });
       }
-      // Подсчёт статистики по вложениям
+      // Count attachment statistics
       for(const m of batch){
         if(Array.isArray(m.attachments)){
           for(const a of m.attachments){
             const v = a.displayHint || (a.contentType && a.contentType.startsWith('image/')) ? 'inline-image' : 'file';
-            // Используем нашу классификацию для точности
+            // Use our own classification for accuracy
             const variant = (a.displayHint) ? a.displayHint : (a.contentType && a.contentType.startsWith('image/') ? 'inline-image':'file');
             if(variant === 'inline-image') inlineImageCount++; else fileCount++;
           }
@@ -798,7 +798,7 @@
     console.log('[seedDemoMessages] Attachments summary:', { inlineImage: inlineImageCount, file: fileCount });
   }
 
-  // Архив: сид сообщений (ленивый). Используем более "исторические" timestamps.
+  // Archive: message seed (lazy). We use more "historical" timestamps.
   function seedArchiveMessages(){
     if(archiveSeeded) return;
     archiveSeeded = true;
@@ -819,7 +819,7 @@
       'Всегда рады помочь!'
     ];
     for(const dlg of ARCHIVE_DIALOGS){
-      const base = now - (dlg.id - 1000) * day; // сдвиг по дням назад
+      const base = now - (dlg.id - 1000) * day; // shift back by days
       const msgs = [
         { id: `a${dlg.id}m1`, dialogId: dlg.id, author: 'client', text: sampleClient[(dlg.id)%sampleClient.length], createdAt: new Date(base - 6*3600*1000).toISOString(), status:'sent' },
         { id: `a${dlg.id}m2`, dialogId: dlg.id, author: dlg.origin === 'bot' ? 'bot':'operator', text: sampleAgent[(dlg.id)%sampleAgent.length], createdAt: new Date(base - 5.5*3600*1000).toISOString(), status:'sent', attachments: (dlg.id % 2 === 0) ? [ { id:`a${dlg.id}f1`, name:`summary-${dlg.id}.pdf`, size:'180 KB', contentType:'application/pdf', displayHint:'file' } ] : undefined },
@@ -832,7 +832,7 @@
   }
 
   /* ====== Templates Store ======
-     Хранилище шаблонов ответов с поддержкой CRUD операций.
+     Reply template store with CRUD support.
   */
   const TemplatesStore = (() => {
     const MOCK_TEMPLATES = [
@@ -912,7 +912,7 @@
   })();
 
   /* ====== Templates Modal ======
-     Модальное окно для работы с шаблонами ответов.
+     Modal window for managing reply templates.
   */
   const TemplatesModal = (() => {
     let modal, templatesTab, createTab, templatesPanel, createPanel, templatesList, templatesCount, templatesEmpty;
@@ -937,7 +937,7 @@
       templateCancel = document.getElementById('templateCancel');
       templateSave = document.getElementById('templateSave');
 
-  // Инициализация disabled состояния кнопки сохранения
+  // Initialize the disabled state of the save button
   updateSaveButtonState();
 
       setupEventListeners();
@@ -946,11 +946,11 @@
     }
 
     function setupEventListeners() {
-      // Закрытие модального окна
+      // Close the modal
       const closeBtn = document.getElementById('templatesModalClose');
       closeBtn.addEventListener('click', hide);
       
-      // Закрытие по ESC и клику на overlay
+      // Close on ESC and overlay click
       modal.addEventListener('click', (e) => {
         if (e.target === modal) hide();
       });
@@ -961,31 +961,31 @@
         }
       });
 
-      // Переключение вкладок
+      // Switching tabs
       templatesTab.addEventListener('click', () => switchTab('templates'));
       createTab.addEventListener('click', () => switchTab('create'));
 
-      // Форма создания/редактирования шаблона
+      // Template create/edit form
       templateForm.addEventListener('submit', handleFormSubmit);
       templateCancel.addEventListener('click', () => switchTab('templates'));
-  // Отслеживание ввода в полях для управления disabled состоянием
+  // Track input in fields to manage the disabled state
   templateName.addEventListener('input', updateSaveButtonState);
   templateText.addEventListener('input', updateSaveButtonState);
       
-      // Делегирование событий для кнопок действий шаблонов
+      // Event delegation for template action buttons
       templatesList.addEventListener('click', handleTemplateAction);
-      // Клик по самому элементу шаблона: вставить текст и закрыть модалку
+      // Click on the template item itself: insert text and close the modal
       templatesList.addEventListener('click', (e) => {
         const item = e.target.closest('.template-item');
         if (!item) return;
-        // Если клик был по кнопке действия, обработку отдаём handleTemplateAction
+        // If the click was on an action button, hand processing to handleTemplateAction
         if (e.target.closest('[data-action]')) return;
         const id = parseInt(item.getAttribute('data-template-id'));
         const template = TemplatesStore.getById(id);
         if (!template) return;
         const input = document.getElementById('chatInput');
         if (input) {
-          // Вставляем текст (заменяем или добавляем перенос?) — используем добавление с разделителем
+          // Insert text (replace or add a line break?) — we append with a separator
           const append = template.text;
           const hasValue = input.value.trim().length > 0;
           input.value = hasValue ? input.value + (input.value.endsWith('\n') ? '' : '\n') + append : append;
@@ -1103,18 +1103,18 @@
     }
 
     function copyTemplateText(text) {
-      // Если есть активное поле ввода сообщения, вставляем туда текст
+      // If there is an active message input, insert the text there
       const activeTextarea = document.querySelector('#chatInput');
       if (activeTextarea) {
         const currentValue = activeTextarea.value;
         const newValue = currentValue ? currentValue + '\n\n' + text : text;
         activeTextarea.value = newValue;
         activeTextarea.focus();
-        // Имитируем событие input для обновления UI
+        // Simulate an input event to update the UI
         activeTextarea.dispatchEvent(new Event('input', { bubbles: true }));
         hide();
       } else {
-        // Копируем в буфер обмена
+        // Copy to clipboard
         navigator.clipboard.writeText(text).then(() => {
           console.log('[TemplatesModal] Text copied to clipboard');
         }).catch(err => {
@@ -1129,12 +1129,12 @@
       templateText.value = template.text;
       const spanLabel = templateSave.querySelector('span');
       if (spanLabel) spanLabel.textContent = 'Сохранить изменения';
-      templateSave.disabled = false; // Раз редактируем — кнопка активна
+      templateSave.disabled = false; // Once editing, the button is active
       switchTab('create');
     }
 
     function deleteTemplate(template) {
-      // Мгновенное удаление без native confirm по требованию
+      // Instant deletion without native confirm, as required
       TemplatesStore.delete(template.id);
       if (typeof window.showServiceNotification === 'function') {
         window.showServiceNotification('Шаблон удалён', 'Шаблон успешно удалён');
@@ -1183,8 +1183,8 @@
     return { show, hide };
   })();
 
-  /* ====== Утилиты ======
-     Мелкие вспомогательные функции без побочных эффектов.
+  /* ====== Utilities ======
+     Small helper functions without side effects.
   */
   function paginate(items, page, size) {
     const start = (page - 1) * size;
@@ -1202,11 +1202,11 @@
   }
 
   /* ====== Image Preview Modal ======
-     Ленивая инициализация: создаём один экземпляр и переиспользуем.
-     Особенности:
-       - Закрытие по ESC, клику на оверлей, кнопке крестика.
-       - Trap focus внутри модалки (два интерактивных элемента).
-       - Кнопка скачивания использует download и прямую ссылку.
+     Lazy initialization: create one instance and reuse it.
+     Features:
+       - Close on ESC, overlay click, close button.
+       - Trap focus inside the modal (two interactive elements).
+       - The download button uses the download attribute and a direct link.
   */
   const ImagePreviewModal = (() => {
     let overlay = null;
@@ -1268,13 +1268,13 @@
     return { open, close };
   })();
 
-  /* ====== Рендер ======
-     Перерисовывает список текущей страницы. Подписки на события — ниже.
+  /* ====== Render ======
+     Re-renders the current page list. Event subscriptions are below.
   */
   /**
-   * Рендерит текущую страницу списка диалогов на основе state.currentPage/state.pageSize.
-   * Обновляет пагинационные контролы и счётчик.
-   * Побочные эффекты: изменяет DOM внутри списка и элементов управления.
+   * Renders the current page of the dialog list based on state.currentPage/state.pageSize.
+   * Updates pagination controls and the counter.
+   * Side effects: modifies the DOM inside the list and controls.
    */
   function currentDialogs(){ return state.viewMode === 'active' ? MOCK_DIALOGS : ARCHIVE_DIALOGS; }
 
@@ -1337,8 +1337,8 @@
   }
 
   /**
-   * Выбирает диалог, обновляет визуальное состояние списка и правую панель.
-   * Если открыто контекстное меню, пересобирает его под текущий диалог.
+   * Selects the dialog, updates the visual state of the list and the right panel.
+   * If the context menu is open, rebuilds it for the current dialog.
    * @param {number|null} id
    */
   function selectDialog(id) {
@@ -1346,7 +1346,7 @@
     for (const node of dom.list.children) {
       node.setAttribute('aria-selected', String(node.dataset.id == String(id)));
     }
-    // Если контекстное меню уже открыто во время смены seleção — обновить его содержимое
+    // If the context menu is already open while selection changes — update its content
     if (dom.dialogMenu && dom.dialogMenu.getAttribute('aria-hidden') === 'false') {
       if (!dialogMenuAnchorBtn) {
         const currentLi = dom.list.querySelector(`.dialog[data-id="${String(id)}"]`);
@@ -1355,25 +1355,25 @@
       renderDialogMenuForDialog(id);
       positionDialogMenu();
     }
-    // Показ/скрытие правой панели
+    // Show/hide right panel
     if (dom.chatPanel && dom.workspaceEmpty) {
       if (id != null) {
         dom.chatPanel.hidden = false;
         dom.workspaceEmpty.hidden = true;
-        // Найти данные выбранного диалога
+        // Find the selected dialog data
   const data = getDialogById(id);
         if (data) {
           dom.chatUser.textContent = data.name;
-          // meta: платформа + UID (условно формируем UID на базе id для примера)
+          // meta: platform + UID (we conventionally build the UID from id for the example)
           dom.chatMeta.textContent = `${data.platform} • UID ${String(500000 + data.id)}`;
           if (dom.chatBadge) {
             const badge = buildOriginBadge(data.origin);
             dom.chatBadge.className = badge.className;
             dom.chatBadge.innerHTML = `${badge.iconSvg}${badge.label}`;
           }
-          // Обновить футер под выбранный диалог
+          // Update the footer for the selected dialog
           renderChatFooterForDialog(data);
-          // Отрисовать сообщения для выбранного диалога
+          // Render messages for the selected dialog
           renderMessagesForDialog(data.id);
         }
       } else {
@@ -1385,8 +1385,8 @@
   }
 
   /**
-   * Формирует данные бейджа происхождения диалога (бот / оператор).
-   * Без побочных эффектов. Используется при рендере списка и правой панели.
+   * Builds the data for the dialog origin badge (bot / operator).
+   * No side effects. Used when rendering the list and the right panel.
    * @param {string} origin 'bot' | 'operator'
    * @returns {{className:string,label:string,iconSvg:string,html:string,isBot:boolean}}
    */
@@ -1401,7 +1401,7 @@
   }
 
   /**
-   * Устанавливает origin диалога и возвращает объект (или null).
+   * Sets the dialog origin and returns the object (or null).
    * @param {number} id
    * @param {string} origin 'bot'|'operator'
    */
@@ -1413,7 +1413,7 @@
   }
 
   /**
-   * Обновляет бейдж в списке для конкретного диалога без полного ререндера страницы.
+   * Updates the badge in the list for a specific dialog without a full page re-render.
    */
   function updateDialogListBadge(id){
     const li = dom.list && dom.list.querySelector(`li.dialog[data-id="${id}"]`);
@@ -1426,16 +1426,16 @@
   }
 
   /**
-   * Завершает переход с бота на оператора: обновляет данные, список, шапку и футер.
+   * Completes the bot-to-operator handoff: updates data, list, header and footer.
    * source: 'menu' | 'banner'
    */
   function performSwitchToOperator(dialogId, { source } = { source: 'banner' }){
     if (dialogId == null) return;
     const dlg = getDialogById(dialogId);
-    if (!dlg || dlg.origin === 'operator') return; // уже оператор — ничего не делаем
+    if (!dlg || dlg.origin === 'operator') return; // already operator — do nothing
 
     if (source === 'menu') {
-      // 1) удалить кнопку из меню (если ещё есть) и закрыть меню ДО изменений UI
+      // 1) remove the button from the menu (if still present) and close the menu BEFORE UI changes
       if (dom.dialogMenu) {
         const toOpBtn = dom.dialogMenu.querySelector('[data-action="dlgToOperator"], #dlgToOperator, [id="dlgToOperator"]');
         if (toOpBtn) toOpBtn.remove();
@@ -1445,20 +1445,20 @@
       }
     }
 
-    // 2) обновить данные
+    // 2) update data
     setDialogOrigin(dialogId, 'operator');
 
-    // 3) обновить элемент списка (бейдж)
+    // 3) update the list item (badge)
     updateDialogListBadge(dialogId);
 
-    // 4) если открыт именно этот диалог — обновить шапку и футер
+    // 4) if this dialog is open, update the header and footer
     if (state.selectedId === dialogId) {
       const badge = buildOriginBadge('operator');
       if (dom.chatBadge) {
         dom.chatBadge.className = badge.className;
         dom.chatBadge.innerHTML = `${badge.iconSvg}${badge.label}`;
       }
-      // Перерисовать футер на composer
+      // Re-render the footer into composer mode
       const dlgData = getDialogById(dialogId);
       renderChatFooterForDialog(dlgData);
     }
@@ -1466,7 +1466,7 @@
     console.log('[switch] dialog', dialogId, 'переведён на оператора (source:', source, ')');
   }
 
-  /* ====== Футер чата (динамический) ====== */
+  /* ====== Chat footer (dynamic) ====== */
   function createAiBanner(dialogId){
     const banner = document.createElement('div');
     banner.className = 'chat__ai-banner';
@@ -1490,33 +1490,33 @@
     wrapper.className = 'chat__composer-wrapper';
     wrapper.innerHTML = `
       <input type="file" id="fileInput" multiple style="display:none" accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt" />
-      <div class="chat__composer" role="group" aria-label="Отправка сообщения оператором">
+      <div class="chat__composer" role="group" aria-label="Operator message sending">
         <div class="chat__composer-main">
-          <textarea class="chat__input" id="chatInput" placeholder="Введите сообщение... (Enter - отправить, Ctrl+K - шаблоны)" aria-label="Поле ввода сообщения" rows="1"></textarea>
+          <textarea class="chat__input" id="chatInput" placeholder="Type a message... (Enter - send, Ctrl+K - templates)" aria-label="Message input field" rows="1"></textarea>
           <div class="chat__composer-actions">
-            <button type="button" class="chat__icon-btn" id="btnAttach" title="Прикрепить файл" aria-label="Прикрепить файл">
+            <button type="button" class="chat__icon-btn" id="btnAttach" title="Attach file" aria-label="Attach file">
               <img src="images/attach.svg" alt="" aria-hidden="true" width="20" height="20" />
             </button>
-            <button type="button" class="chat__icon-btn" id="btnTemplates" title="Шаблоны (Ctrl+K)" aria-label="Открыть шаблоны (Ctrl+K)">
+            <button type="button" class="chat__icon-btn" id="btnTemplates" title="Templates (Ctrl+K)" aria-label="Open templates (Ctrl+K)">
               <img src="images/templates.svg" alt="" aria-hidden="true" width="20" height="20" />
             </button>
           </div>
         </div>
       </div>
-      <div class="chat__pending" id="pendingAttachments" aria-live="polite" aria-label="Вложения к сообщению"></div>
+      <div class="chat__pending" id="pendingAttachments" aria-live="polite" aria-label="Message attachments"></div>
       <div class="chat__composer-bottom">
         <div class="chat__composer-hint" id="chatShortcuts" aria-hidden="false">
-          <span class="chat__shortcut-key"><kbd>Enter</kbd> — отправить</span>
-          <span class="chat__shortcut-key"><kbd>Ctrl+K</kbd> — шаблоны</span>
+          <span class="chat__shortcut-key"><kbd>Enter</kbd> — send</span>
+          <span class="chat__shortcut-key"><kbd>Ctrl+K</kbd> — templates</span>
         </div>
-        <button type="button" class="chat__send-btn" id="btnSend" aria-label="Отправить сообщение">
+        <button type="button" class="chat__send-btn" id="btnSend" aria-label="Send message">
           <img src="images/send.svg" class="chat__send-btn-icon" alt="" aria-hidden="true" />
-          <span>Отправить</span>
+          <span>Send</span>
         </button>
       </div>
     `;
 
-    // Логика: авто-высота textarea + управление состоянием кнопки отправки
+    // Logic: textarea auto-height + send button state management
     const textarea = wrapper.querySelector('#chatInput');
     const btnSend = wrapper.querySelector('#btnSend');
     const btnAttach = wrapper.querySelector('#btnAttach');
@@ -1524,7 +1524,7 @@
     const fileInput = wrapper.querySelector('#fileInput');
     const pendingRoot = wrapper.querySelector('#pendingAttachments');
 
-    // Локальное состояние вложений композера (не попадает в MessageStore до отправки)
+    // Local state of composer attachments (not added to MessageStore until sent)
     const pending = []; // { id, file, name, sizeBytes, sizeLabel, contentType, url, status, progress, displayHint }
     let pendingCounter = 1;
 
@@ -1596,7 +1596,7 @@
       const hasText = textarea.value.trim().length > 0;
       const hasReadyAtt = pending.some(a=>a.status==='ready');
       const uploading = pending.some(a=>a.status==='uploading');
-      // Разрешаем отправку если есть текст или хотя бы один готовый аттач
+      // Allow sending if there is text or at least one ready attachment
       const enabled = hasText || hasReadyAtt;
       btnSend.disabled = !enabled;
       btnSend.classList.toggle('is-disabled', !enabled);
@@ -1604,24 +1604,24 @@
     }
 
     function simulateUpload(model){
-      // Имитация: скорость ~1000-2000мс
+      // Simulation: speed ~1000-2000ms
       const totalMs = 1000 + Math.random()*1500;
       const started = performance.now();
       function step(){
-        if(model.status !== 'uploading') return; // мог быть удалён
+        if(model.status !== 'uploading') return; // may have been removed
         const elapsed = performance.now() - started;
         model.progress = Math.min(100, Math.round(elapsed / totalMs * 100));
         renderPending();
         updateSendBtnState();
         if(elapsed >= totalMs){
-          // 5% шанс ошибки для демонстрации
+          // 5% chance of error for demonstration
           if(Math.random() < 0.05){
             model.status = 'error';
             model.progress = 0;
           } else {
             model.status = 'ready';
             model.progress = 100;
-            // Определяем displayHint
+            // Determine displayHint
             if(isLikelyImage(model.file) && model.sizeBytes <= INLINE_IMAGE_MAX_BYTES){
               model.displayHint = 'inline-image';
             } else {
@@ -1679,7 +1679,7 @@
     fileInput.addEventListener('change', (e)=>{
       const files = Array.from(e.target.files || []);
       if(files.length){ addFiles(files); }
-      fileInput.value=''; // чтобы одно и то же имя файла можно было выбрать повторно
+      fileInput.value=''; // so the same file name can be selected again
     });
     function triggerTemplates(){ TemplatesModal.show(); }
     btnTemplates.addEventListener('click', triggerTemplates);
@@ -1689,10 +1689,10 @@
       const value = textarea.value.trim();
       const readyAtts = pending.filter(a=>a.status==='ready');
       if(!value && !readyAtts.length){
-        console.log('[composer] пустое сообщение без готовых вложений');
+        console.log('[composer] empty message without ready attachments');
         return;
       }
-      // Добавление сообщения оператора в текущий диалог
+      // Adding an operator message to the current dialog
       if(state.selectedId != null){
         const attachments = readyAtts.map(m => ({
           id: 'upl:' + m.id,
@@ -1704,8 +1704,8 @@
             displayHint: m.displayHint
         }));
         addMessage(state.selectedId, { author:'operator', text:value || (attachments.length? '': ''), attachments, createdAt: new Date() });
-        // Очистить pending. ВАЖНО: не отзывать objectURL тех вложений, которые мы только что добавили в чат,
-        // иначе blob станет недоступным для предпросмотра (модалка откроется пустой).
+        // Clear pending. IMPORTANT: do not revoke the objectURLs of attachments we just added to the chat,
+        // otherwise the blob becomes unavailable for preview (the modal would open empty).
         const usedUrls = new Set(readyAtts.map(m=>m.url));
         for(const m of pending){
           if(!usedUrls.has(m.url)){
@@ -1715,14 +1715,14 @@
         pending.length = 0;
         renderPending();
       } else {
-        console.warn('[composer] нет выбранного диалога');
+        console.warn('[composer] no dialog selected');
       }
       textarea.value='';
       autoResize();
       updateSendBtnState();
     }
 
-    // Горячие клавиши внутри textarea
+    // Hotkeys inside textarea
     textarea.addEventListener('keydown', (e)=>{
       if(e.key === 'Enter' && !e.shiftKey){
         e.preventDefault();
@@ -1733,7 +1733,7 @@
       }
     });
 
-    // Глобальный Ctrl+K когда фокус в textarea (дублирование логики для надёжности)
+    // Global Ctrl+K when focus is in textarea (logic duplicated for reliability)
     wrapper.addEventListener('keydown', (e)=>{
       if ((e.key === 'k' || e.key === 'K') && (e.ctrlKey || e.metaKey)) {
         if(document.activeElement === textarea){
@@ -1755,12 +1755,12 @@
     dom.chatFooter.appendChild(el);
   }
 
-  // Делегирование клика по inline изображениям внутри тела чата
+  // Delegated click on inline images inside the chat body
   if(dom.chatBody){
     dom.chatBody.addEventListener('click', (e)=>{
-      // Если клик по кнопке скачивания внутри inline image — позволяем скачать и не открываем модалку
+      // If the click is on a download button inside an inline image — allow the download and do not open the modal
       const dlBtn = e.target.closest('.msg-image__download');
-      if(dlBtn) return; // браузер выполнит стандартное скачивание
+      if(dlBtn) return; // the browser will perform the standard download
       const fig = e.target.closest && e.target.closest('.msg-image');
       if(!fig || !dom.chatBody.contains(fig)) return;
       const url = fig.getAttribute('data-url');
@@ -1771,7 +1771,7 @@
     });
   }
 
-  /* ====== События: список (делегирование) ====== */
+  /* ====== Events: list (delegation) ====== */
   function onListClick(event) {
     const li = event.target.closest('li.dialog');
     if (!li || !dom.list.contains(li)) return;
@@ -1788,7 +1788,7 @@
     selectDialog(id);
   }
 
-  /* ====== Пагинация ====== */
+  /* ====== Pagination ====== */
   function goPrev() {
     if (state.currentPage > 1) {
       state.currentPage--;
@@ -1803,8 +1803,8 @@
     }
   }
 
-  /* ====== Кастомный select ======
-     Нативный select остаётся, но скрыт визуально. Видимым управляет .open.
+  /* ====== Custom select ======
+     The native select remains but is visually hidden. The visible part is controlled by .open.
   */
   function setDropdownOpen(isOpen) {
     if (!dom.selectRoot) return;
@@ -1836,8 +1836,8 @@
     dom.projectSelect.dispatchEvent(new Event('change', { bubbles: true }));
   }
 
-  /* ====== Popup menu: проект ======
-     Меню открывается у кнопки проекта. Закрытие — по клику вне/ESC.
+  /* ====== Popup menu: project ======
+     The menu opens at the project button. Closes on outside click/ESC.
   */
   function setProjectMenuOpen(isOpen){
     if (!dom.projectMenu || !dom.projectMenuBtn) return;
@@ -1853,15 +1853,15 @@
     const containerRect = container.getBoundingClientRect();
     const btnRect = dom.projectMenuBtn.getBoundingClientRect();
 
-    // Временно показать для измерения ширины, если скрыто
+    // Temporarily show to measure width if hidden
     const wasHidden = dom.projectMenu.getAttribute('aria-hidden') !== 'false';
     if (wasHidden) {
       dom.projectMenu.style.visibility = 'hidden';
       dom.projectMenu.setAttribute('aria-hidden', 'false');
     }
     const menuWidth = dom.projectMenu.offsetWidth;
-    // Привязать правый край меню к правому краю кнопки
-    const top = btnRect.bottom - containerRect.top + 6; // отступ 6px
+    // Align the right edge of the menu with the right edge of the button
+    const top = btnRect.bottom - containerRect.top + 6; // 6px offset
     const left = btnRect.right - containerRect.left - menuWidth;
     dom.projectMenu.style.top = top + 'px';
     dom.projectMenu.style.left = left + 'px';
@@ -1872,8 +1872,8 @@
     }
   }
 
-  /* ====== Контекстное меню диалога ======
-     Одно меню создаётся на документ и переиспользуется для всех диалогов.
+  /* ====== Dialog context menu ======
+     A single menu is created on the document and reused for all dialogs.
   */
   const ACTION_IDS = Object.freeze({
     CLOSE_PLUS: 'dlgClosePlus',
@@ -1893,43 +1893,43 @@
     Object.freeze({ icon: 'images/person-dash.svg', label: 'Отменить подписку', id: ACTION_IDS.UNSUBSCRIBE }),
   ]);
 
-  /* ====== Обработчики действий меню диалога ======
-     Каждая функция получает { dialogId, actionId, source }.
-     Содержимое пока TODO — здесь будет интеграция (fetch / emit / state update).
-     Архитектурный подход: единый диспетчер ACTION_HANDLERS по id кнопки.
+  /* ====== Dialog menu action handlers ======
+     Each function receives { dialogId, actionId, source }.
+     Content is TODO for now — integration will go here (fetch / emit / state update).
+     Architectural approach: a single ACTION_HANDLERS dispatcher keyed by button id.
   */
   function handleDlgClosePlus(ctx){
-    // TODO: Реализовать логику «Закрыть тикет (+)» (позитивное закрытие тикета)
+    // TODO: Implement "Close ticket (+)" logic (positive ticket closure)
     console.log('[dialog action] ClosePlus', ctx);
   }
   function handleDlgCloseMinus(ctx){
-    // TODO: Реализовать логику «Закрыть тикет (-)» (негативное закрытие тикета)
+    // TODO: Implement "Close ticket (-)" logic (negative ticket closure)
     console.log('[dialog action] CloseMinus', ctx);
   }
   function handleDlgReqPlus(ctx){
-    // TODO: Реализовать логику «Запрос закрытия (+)» (инициировать позитивный запрос)
+    // TODO: Implement "Close request (+)" logic (initiate a positive request)
     console.log('[dialog action] ReqClosePlus', ctx);
   }
   function handleDlgReqMinus(ctx){
-    // TODO: Реализовать логику «Запрос закрытия (-)» (инициировать негативный запрос)
+    // TODO: Implement "Close request (-)" logic (initiate a negative request)
     console.log('[dialog action] ReqCloseMinus', ctx);
   }
   function handleDlgToOperator(ctx){
-    // TODO: Реализовать перевод диалога на живого оператора
+    // TODO: Implement handing the dialog over to a live operator
       console.log('[dialog action] ToOperator', ctx);
       const { dialogId } = ctx || {};
       performSwitchToOperator(dialogId, { source: 'menu' });
   }
   function handleDlgUnsubscribe(ctx){
-    // TODO: Реализовать отмену подписки пользователя на рассылку/уведомления
+    // TODO: Implement unsubscribing the user from mailing/notifications
     console.log('[dialog action] Unsubscribe', ctx);
     const { dialogId } = ctx || {};
-    const modalApi = window.UnsubscribeModal; // безопасно: свойство объекта, не вызовет ReferenceError
+    const modalApi = window.UnsubscribeModal; // safe: object property, will not throw ReferenceError
     if (dialogId != null && modalApi && typeof modalApi.open === 'function') {
       modalApi.open(dialogId, { trigger: 'menu' });
     } else {
-      // Если модалка ещё не инициализирована (скрипт ниже ещё не выполнился)
-      // Попробуем отложить открытие до следующего кадра.
+      // If the modal is not yet initialized (script below has not run yet)
+      // Try deferring the open until the next frame.
       if (dialogId != null) {
         requestAnimationFrame(() => {
           const lateApi = window.UnsubscribeModal;
@@ -1950,7 +1950,7 @@
     [ACTION_IDS.UNSUBSCRIBE]: handleDlgUnsubscribe,
   };
 
-  // === Ленивая инициализация контейнера меню диалога ===
+  // === Lazy initialization of the dialog menu container ===
   function ensureDialogMenuContainer(){
     if (dom.dialogMenu) return dom.dialogMenu;
     const el = document.createElement('div');
@@ -1959,7 +1959,7 @@
     el.setAttribute('role', 'menu');
     el.setAttribute('aria-hidden', 'true');
     document.body.appendChild(el);
-    // Делегирование кликов по пунктам меню
+    // Delegated clicks on menu items
     el.addEventListener('click', (ev) => {
       if (el.getAttribute('aria-hidden') === 'true') return;
       const itemBtn = ev.target.closest('.popup-menu__item');
@@ -1981,10 +1981,10 @@
     return el;
   }
 
-  // Пересобирает пункты меню для конкретного диалога (фильтрация на этапе компоновки)
+  // Rebuilds menu items for a specific dialog (filtering at composition time)
   /**
-   * Пересобирает HTML контекстного меню для заданного dialogId.
-   * Фильтрует пункт перевода на оператора, если origin уже operator.
+   * Rebuilds the HTML of the context menu for the given dialogId.
+   * Filters out the handoff-to-operator item if origin is already operator.
    * @param {number|null} dialogId
    */
   function renderDialogMenuForDialog(dialogId){
@@ -2009,7 +2009,7 @@
     return li ? Number(li.dataset.id) : null;
   }
   /**
-   * Открывает/закрывает контекстное меню диалога. При открытии пересобирает содержимое.
+   * Opens/closes the dialog context menu. Rebuilds content on open.
    * @param {boolean} isOpen
    */
   function setDialogMenuOpen(isOpen){
@@ -2024,7 +2024,7 @@
   }
 
   /**
-   * Позиционирует контекстное меню относительно кнопки-анкера.
+   * Positions the context menu relative to the anchor button.
    */
   function positionDialogMenu(){
     if (!dialogMenuAnchorBtn || !dom.dialogMenu) return;
@@ -2033,29 +2033,29 @@
     const top = Math.round(btnRect.bottom + 6);
     const menuWidth = dom.dialogMenu.offsetWidth || 0;
     let left = Math.round(btnRect.right - menuWidth);
-    if (left < 8) left = 8; // небольшой отступ от края
+    if (left < 8) left = 8; // small offset from the edge
     dom.dialogMenu.style.top = top + 'px';
     dom.dialogMenu.style.left = left + 'px';
     dom.dialogMenu.style.right = 'auto';
   }
 
-  /* ====== Инициализация ======
-     Точка входа: рендер, подписки, подготовка меню.
+  /* ====== Initialization ======
+     Entry point: render, subscriptions, menu preparation.
   */
   function init() {
-    // Рендер начальной страницы
+    // Render the initial page
     renderList();
-    // Состояние правой панели по умолчанию
+    // Default right panel state
     if (dom.chatPanel) dom.chatPanel.hidden = true;
 
-    // Демо-сообщения
+    // Demo messages
     seedDemoMessages();
 
-  // Контекстное меню диалога создаётся лениво при первом открытии (ensureDialogMenuContainer)
+  // The dialog context menu is created lazily on first open (ensureDialogMenuContainer)
 
-    // Список: делегирование
+    // List: delegation
     dom.list.addEventListener('click', (event) => {
-      // клик по кнопке меню в элементе списка
+      // click on the menu button in a list item
       const menuBtn = event.target.closest('.dialog__menu .icon-btn');
       if (menuBtn) {
         event.stopPropagation();
@@ -2069,11 +2069,11 @@
     });
     dom.list.addEventListener('keydown', onListKeydown);
 
-    // Пагинация
+    // Pagination
     dom.btnPrev.addEventListener('click', goPrev);
     dom.btnNext.addEventListener('click', goNext);
 
-    // Select: клик по всему контейнеру открывает список (кроме самого dropdown)
+    // Select: clicking anywhere in the container opens the list (except the dropdown itself)
     dom.selectRoot.addEventListener('click', (e) => {
       if (dom.dropdown.contains(e.target)) return;
       setDropdownOpen(true);
@@ -2093,7 +2093,7 @@
       });
     });
 
-    // Глобальные обработчики
+    // Global handlers
     document.addEventListener('click', (e) => {
       if (!dom.selectRoot.contains(e.target)) setDropdownOpen(false);
       if (dom.projectMenu && dom.projectMenuBtn) {
@@ -2118,19 +2118,19 @@
 
     // Logout
     dom.logout.addEventListener('click', () => {
-      // TODO: интегрировать реальный logout
+      // TODO: integrate real logout
       console.log('Logout clicked');
     });
 
-    // Футер будет наполняться при выборе диалога (selectDialog -> renderChatFooterForDialog)
+    // The footer will be populated when a dialog is selected (selectDialog -> renderChatFooterForDialog)
 
-    // Popup menu (проект)
+    // Popup menu (project)
     dom.projectMenuBtn.addEventListener('click', (e) => {
       e.stopPropagation();
       const isOpen = dom.projectMenu.getAttribute('aria-hidden') === 'false';
       setProjectMenuOpen(!isOpen);
     });
-    // Переключение активные / архивные
+    // Toggle active / archived
     const openArchiveBtn = document.getElementById('menuOpenArchive');
     if(openArchiveBtn){
       openArchiveBtn.addEventListener('click', (e)=>{
@@ -2139,15 +2139,15 @@
         setProjectMenuOpen(false);
       });
     }
-    // Закрывать меню проекта после выбора пункта
+    // Close the project menu after selecting an item
     if (dom.projectMenu) {
       dom.projectMenu.addEventListener('click', (e) => {
         const item = e.target.closest('.popup-menu__item');
         if (!item) return;
-        // Логика обработки действия пункта (пока только лог)
+        // Logic for handling the item action (logging only for now)
         console.log('Project menu action:', item.id || '(no-id)');
         setProjectMenuOpen(false);
-        // Убираем фокус с пункта, чтобы не оставалось визуального состояния
+        // Blur the item so no visual state remains
         if (document.activeElement === item) item.blur();
       });
     }
@@ -2160,16 +2160,16 @@
       if (dom.dialogMenu && dom.dialogMenu.getAttribute('aria-hidden') === 'false') positionDialogMenu();
     }, true);
 
-    // (listener кликов меню добавляется при создании контейнера)
+    // (menu click listener is added when the container is created)
 
-    // Экспорт обработчиков наружу (опционально для будущих модулей/тестов)
+    // Export handlers externally (optional, for future modules/tests)
     window.app = window.app || {};
     window.app.dialogActions = ACTION_HANDLERS;
-    // Экспорт unsubscribe API (если модуль уже успел проинициализироваться ниже по файлу)
+    // Export unsubscribe API (if the module was already initialized further down the file)
     if (typeof UnsubscribeModal !== 'undefined') {
       window.app.unsubscribe = UnsubscribeModal;
     } else {
-      // Отложенная попытка после окончания текущего цикла
+      // Deferred attempt after the current tick
       setTimeout(() => {
         if (typeof UnsubscribeModal !== 'undefined') {
           window.app.unsubscribe = UnsubscribeModal;
@@ -2178,8 +2178,8 @@
     }
   }
 
-  // === helper: безопасно обновляет таймер внутри li ===
-  // Методы работы с таймером доступны через window.app.dialogs.* для интеграции.
+  // === helper: safely updates the timer inside li ===
+  // Timer methods are available via window.app.dialogs.* for integration.
   function _getTimerNodeForLi(li) {
     return li.querySelector('.dialog__timer');
   }
@@ -2222,7 +2222,7 @@
   }
 
   /**
-   * Возвращает объект диалога по id или null.
+   * Returns the dialog object by id or null.
    * @param {number|null} id
    * @returns {{id:number,name:string,time:string,platform:string,origin:string}|null}
    */
@@ -2231,7 +2231,7 @@
     return MOCK_DIALOGS.find(d => d.id === id) || ARCHIVE_DIALOGS.find(d => d.id === id) || null;
   }
 
-  // ====== Переключение активные / архивные диалоги ======
+  // ====== Toggle active / archived dialogs ======
   function applyViewMode(){
     const isArchive = state.viewMode === 'archive';
     document.documentElement.classList.toggle('view-archive', isArchive);
@@ -2256,25 +2256,25 @@
     applyViewMode();
   }
 
-  // Экспорт API для использования из консоли/других модулей
+  // Export API for use from the console/other modules
   const dialogsApi = { setDialogTimer, showDialogTimer, hideDialogTimer };
   window.app = window.app || {};
   window.app.dialogs = dialogsApi;
-  // Экспортируем доступ к данным диалога для внешних модулей (unsubscribe modal)
+  // Export access to dialog data for external modules (unsubscribe modal)
   window.getDialogById = getDialogById;
   window.toggleArchiveMode = toggleArchiveMode;
   window.ARCHIVE_DIALOGS = ARCHIVE_DIALOGS;
-  // Удобные глобальные алиасы (для отладки)
+  // Convenient global aliases (for debugging)
   window.setDialogTimer = setDialogTimer;
   window.showDialogTimer = showDialogTimer;
   window.hideDialogTimer = hideDialogTimer;
 
-  // === ЕДИНЫЙ ПУБЛИЧНЫЙ API (AppAPI) ===
-  // Централизованный контракт для интеграции. Сохраняет обратную совместимость с существующими глобалами.
+  // === SINGLE PUBLIC API (AppAPI) ===
+  // Centralized integration contract. Preserves backward compatibility with existing globals.
   (function exposeUnifiedApi(){
-    if(window.AppAPI) return; // не переопределяем если уже создали (на случай повторной загрузки)
+    if(window.AppAPI) return; // do not override if already created (in case of a repeated load)
     const unified = {
-      version: '1.0.1', // patch: добавлена поддержка вложений в client-сообщениях
+      version: '1.0.1', // patch: added attachment support in client messages
       auth: window.Auth ? {
         isAuthed: window.Auth.isAuthed,
         getPhase: window.Auth.getPhase,
@@ -2315,13 +2315,13 @@
     window.AppAPI = unified;
   })();
 
-  // Старт
+  // Start
   init();
 })();
 
 /* ====== Logout Confirmation Modal Module ======
-   Назначение: показывать небольшую модалку подтверждения выхода вместо мгновенного logout.
-   Архитектура аналогична UnsubscribeModal, но без блока ошибок и дополнительных данных.
+   Purpose: show a small logout confirmation modal instead of an instant logout.
+   Architecture is similar to UnsubscribeModal, but without the error block and extra data.
    API: window.LogoutConfirm.open({trigger}) / close().
 */
 (function(){
@@ -2388,17 +2388,17 @@
     if(state.loading) return;
     setLoading(true);
     try {
-      // Небольшая искусственная задержка для UX (ощущение действия)
+      // Small artificial delay for UX (sense of action)
       await new Promise(r=>setTimeout(r, 250));
       if(window.Auth && typeof window.Auth.performLogout === 'function'){
         window.Auth.performLogout();
       } else {
-        // Fallback если Auth не инициализирован
+        // Fallback if Auth is not initialized
         try { localStorage.removeItem('authToken'); } catch(_){ /* noop */ }
         console.warn('[LogoutConfirm] Auth.performLogout отсутствует, применён fallback');
         if(window.Auth && typeof window.Auth.showLogin === 'function') window.Auth.showLogin();
       }
-      // Не возвращаем фокус к кнопке выхода, так как появляется экран логина.
+      // We do not return focus to the logout button, since the login screen appears.
       close({ returnFocus:false });
     } finally {
       setLoading(false);
@@ -2421,16 +2421,16 @@
 })();
 
 /* ====== Unsubscribe Confirmation Modal Module ======
-   Архитектура: независимый модуль без замыкания на весь файл: использует
-   публичный API (getDialogById) через window.app.dialogs не требуется.
-   Модель состояния: { open:boolean, dialogId:number|null, loading:boolean, lastTrigger: string|null }
-   Методы:
-     open(dialogId, {trigger})   — показывает модалку, заполняет имя пользователя
-     close({returnFocus})        — скрывает модалку, опционально возвращает фокус
-     setLoading(bool)            — включает/выключает состояние загрузки у кнопки подтверждения
-     setError(message|null)      — показывает/прячет блок ошибки
-     submit()                    — имитирует асинхронный запрос отмены подписки (mock)
-   Для интеграции с реальным backend заменить функцию fakeRequest на fetch.
+   Architecture: an independent module not coupled to the whole file: uses
+   public API (getDialogById) via window.app.dialogs is not required.
+   State model: { open:boolean, dialogId:number|null, loading:boolean, lastTrigger: string|null }
+   Methods:
+     open(dialogId, {trigger})   — shows the modal, fills in the user name
+     close({returnFocus})        — hides the modal, optionally returns focus
+     setLoading(bool)            — toggles the loading state of the confirm button
+     setError(message|null)      — shows/hides the error block
+     submit()                    — simulates an async unsubscribe request (mock)
+   For integration with a real backend, replace the fakeRequest function with fetch.
 */
 (function(){
   'use strict';
@@ -2511,7 +2511,7 @@
 
   function fakeRequest(){
     return new Promise((resolve,reject)=>{
-      // симуляция: 50% шанс ошибки, 900мс
+      // simulation: 50% chance of error, 900ms
       setTimeout(()=>{ Math.random() < 0.5 ? resolve({ ok:true }) : reject(new Error('Не удалось найти и отменить подписку')); }, 900);
     });
   }
@@ -2521,9 +2521,9 @@
     setError(null);
     setLoading(true);
     try {
-      // Заменить fakeRequest на реальный fetch
+      // Replace fakeRequest with a real fetch
       await fakeRequest();
-      // Успех: закрыть модалку
+      // Success: close the modal
       close({ returnFocus:true });
       console.log('[Unsubscribe] success for dialog', state.dialogId);
       if (typeof window.showServiceNotification === 'function') {
@@ -2551,26 +2551,26 @@
   el.cancel.addEventListener('click', ()=> close({ returnFocus:true }));
   el.confirm.addEventListener('click', submit);
 
-  // Экспорт API
+  // Export API
   window.UnsubscribeModal = { open, close, submit, setError, clearError, setLoading };
 })();
 
 /* ====== Service Notifications (Toast) Module ======
-   Назначение: компактные служебные уведомления (toast) справа снизу.
-   Упрощённый API (v2):
+   Purpose: compact service notifications (toasts) at the bottom right.
+   Simplified API (v2):
      showServiceNotification(title, message)
-       title   — строка заголовка (обязательно)
-       message — строка текста (может быть пустой)
+       title   — title string (required)
+       message — text string (may be empty)
 
-   Legacy: третий параметр (объект) допустим и сейчас учитывается только свойство timeout.
-     showServiceNotification('Saved','Изменения применены',{ timeout: 6000 });
-     timeout: число мс (0 или отрицательное/Infinity => без авто закрытия).
+   Legacy: the third parameter (object) is allowed; only the timeout property is considered.
+     showServiceNotification('Saved','Changes applied',{ timeout: 6000 });
+     timeout: number of ms (0 or negative/Infinity => no auto close).
 
-   Поведение:
-     - Авто‑закрытие по умолчанию 4000 мс.
-     - Максимум 5 активных уведомлений (FIFO удаление старых).
-     - Нет полосы прогресса; кнопка закрытия видна только при hover/фокусе.
-     - Контейнер имеет aria-live="polite" для доступности.
+   Behavior:
+     - Auto-close after 4000 ms by default.
+     - Max 5 active notifications (old ones removed FIFO).
+     - No progress bar; the close button is visible only on hover/focus.
+     - Container has aria-live="polite" for accessibility.
 */
 (function ServiceToasts(){
   const MAX_TOASTS = 5;
@@ -2647,11 +2647,11 @@
     }
   }
 
-  // Новый упрощённый API: showServiceNotification(title, message)
-  // Для обратной совместимости третий параметр (opts) можно передать, но он игнорируется (кроме legacy timeout>0 для автозакрытия)
+  // New simplified API: showServiceNotification(title, message)
+  // For backward compatibility the third parameter (opts) may be passed but is ignored (except legacy timeout>0 for auto-close)
   function showServiceNotification(title, message='', legacyOpts){
     const opts = (legacyOpts && typeof legacyOpts === 'object') ? legacyOpts : {};
-    // Сохраняем только timeout (если нужен отказ от авто закрытия) — остальные опции убраны
+    // Keep only timeout (to opt out of auto-close) — other options removed
     const timeout = (typeof opts.timeout === 'number') ? opts.timeout : DEFAULT_TIMEOUT;
     const options = { variant:'default', timeout, id:null, closeButton:true };
     const id = buildId(options.id);
