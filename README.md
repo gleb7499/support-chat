@@ -20,8 +20,16 @@ A small frontend prototype of a support operator panel (active / archived dialog
 3. After login, the list of active dialogs is available. The archive is switched via the project menu (three dots → "Open archived chats").
 
 ## Architecture (brief)
-- `scripts.js` — a monolithic file of modules (IIFE), no bundler.
-- Modules: Auth, ActiveDialogsApp, LogoutConfirm, UnsubscribeModal, ServiceToasts.
+- No bundler: plain scripts in `js/`, loaded via `<script defer>` in `index.html`.
+- Modules (IIFE) share a single internal context object, `window.SC`:
+  - `js/auth.js` — Auth / login screen module (state machine, validation); exports `window.Auth`.
+  - `js/store.js` — state, cached DOM refs, mock dialog data, `MessageStore` (normalized), archive seeding flag.
+  - `js/messages.js` — message utilities, attachment helpers (inline image / file), message rendering, demo-data seeding.
+  - `js/modals.js` — reply templates modal (CRUD), `TemplatesStore`, image preview modal.
+  - `js/dialogs.js` — dialog list rendering, selection, origin badges, switch-to-operator, active/archive toggle, SLA timer pills.
+  - `js/chat-ui.js` — chat footer (AI banner / operator composer), list event delegation, pagination, custom select, popup/context menus.
+  - `js/logout-modal.js`, `js/unsubscribe-modal.js`, `js/toasts.js` — confirmation modals and service toasts.
+  - `js/app.js` — initialization, event wiring, and the single public `window.AppAPI`.
 - Dialog / message data is mock (arrays + in-memory MessageStore). The archive is seeded lazily.
 - Reply templates — local in-memory store (CRUD).
 - Messages support attachments (inline image / file) with upgrade / fallback rendering.
