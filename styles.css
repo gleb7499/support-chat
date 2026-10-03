@@ -1661,6 +1661,27 @@ button { font: inherit; color: inherit; }
   color: var(--text-muted-alt);
 }
 
+.login-card__demo-hint {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 10px 0 14px;
+  padding: 10px 12px;
+  border: 1px solid rgba(139, 92, 246, .45);
+  border-radius: 10px;
+  background: rgba(139, 92, 246, .12);
+  font: 12px/1.45 system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif;
+  color: var(--text);
+}
+
+.login-card__demo-hint strong {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: .3px;
+  text-transform: uppercase;
+  color: #b79af7;
+}
+
 .login-card__field-group { display: flex; flex-direction: column; gap: 6px; }
 .login-card__label { font-size: 12px; font-weight: 500; color: var(--text-muted-alt); }
 
